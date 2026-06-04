@@ -1,65 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="ta">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>Panchapatchi Moon Tree</title>
-  <meta name="description" content="Panchapatchi tree structure by moon phase, weekday, day/night and five time parts." />
-  <link rel="stylesheet" href="assets/css/style.css?v=006" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>பஞ்ச பட்சி | Moon Time Tree</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=007">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="index.html">Panchapatchi</a>
-    <nav>
-      <a href="waxing.html">0°–180°</a>
-      <a href="waning.html">180°–360°</a>
-      <a href="tree.html">Tree</a>
-    </nav>
-  </header>
-
-  <main class="shell">
-    <section class="moon-stage">
-      <div class="orbit-wrap">
-        <div class="orbit" id="orbit"></div>
-        <div class="axis-label right">Block 0<br><span>New / Dark Moon<br>3 o’clock</span></div>
-        <div class="axis-label left">Block 15<br><span>Full Moon<br>9 o’clock</span></div>
-      </div>
-      <div class="status-card">
-        <p class="eyebrow">Current Moon Block</p>
-        <h1 id="currentBlockTitle">Block -- / 30</h1>
-        <p id="phaseText">Calculating moon phase from Sun angle − Moon angle.</p>
-        <div class="mini-grid">
-          <span>Each block</span><b>12°</b>
-          <span>New Moon</span><b>0° / 360°</b>
-          <span>Full Moon</span><b>180°</b>
-        </div>
-      </div>
-    </section>
-
-    <section class="cards two">
-      <a class="big-link" href="waxing.html">
-        <span>0° → 180°</span>
-        <strong>Moon Light Growing</strong>
-        <em>Sunday to Saturday → Day/Night → 5 parts → details</em>
-      </a>
-      <a class="big-link" href="waning.html">
-        <span>180° → 360°</span>
-        <strong>Moon Light Reducing</strong>
-        <em>Sunday to Saturday → Day/Night → 5 parts → details</em>
-      </a>
-    </section>
-
-    <section class="panel">
-      <h2>Tree flow</h2>
-      <div class="flow">
-        <span>Moon Phase</span><i>→</i><span>Weekday</span><i>→</i><span>Day / Night</span><i>→</i><span>5 Parts</span><i>→</i><span>Further detail</span>
-      </div>
-    </section>
-  </main>
-
-  <script src="assets/js/app.js?v=006"></script>
+<header class="topbar">
+  <a class="brand" href="index.html">பஞ்ச பட்சி</a>
+  <nav><a href="oneweek-tree.html">One Week Tree</a></nav>
+</header>
+<main class="wrap">
+  <section class="plain-head">
+    <p class="eyebrow">Trial & Error Build v007</p>
+    <h1>Moon → Day → Day/Night → 5 Parts → 5 Sub Parts</h1>
+    <p>No hero card. Direct calculation layout for Panchapatchi.</p>
+    <a class="btn" href="oneweek-tree.html">Open One Week Tree</a>
+  </section>
+</main>
 </body>
 </html>
