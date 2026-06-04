@@ -1,26 +1,68 @@
 <!doctype html>
-<html lang="ta">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>பஞ்ச பட்சி | Moon Time Tree</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=007">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Panchapatchi Card Model</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=008" />
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="index.html">பஞ்ச பட்சி</a>
-  <nav><a href="oneweek-tree.html">One Week Tree</a></nav>
-</header>
-<main class="wrap">
-  <section class="plain-head">
-    <p class="eyebrow">Trial & Error Build v007</p>
-    <h1>Moon → Day → Day/Night → 5 Parts → 5 Sub Parts</h1>
-    <p>No hero card. Direct calculation layout for Panchapatchi.</p>
-    <a class="btn" href="oneweek-tree.html">Open One Week Tree</a>
-  </section>
-</main>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Panchapatchi trial model</p>
+        <h1>Today Panchapatchi Cards</h1>
+      </div>
+      <div class="clock-card">
+        <span id="clock">--:--:--</span>
+        <small>Current time</small>
+      </div>
+    </header>
+
+    <section class="status-grid">
+      <article class="status-card">
+        <span>Location</span>
+        <strong id="locationStatus">Waiting for location</strong>
+      </article>
+      <article class="status-card">
+        <span>Sunrise</span>
+        <strong id="sunriseText">--:--:--</strong>
+      </article>
+      <article class="status-card">
+        <span>Sunset</span>
+        <strong id="sunsetText">--:--:--</strong>
+      </article>
+      <article class="status-card">
+        <span>Now period</span>
+        <strong id="periodText">--</strong>
+      </article>
+    </section>
+
+    <section class="controls-card">
+      <button id="useLocationBtn">Use my location</button>
+      <button id="demoBtn" class="secondary">Use demo time</button>
+      <p>No sunrise input needed. The page calculates sunrise and sunset from visitor location. Demo uses 06:00:00 to 18:00:00.</p>
+    </section>
+
+    <section id="currentCard" class="current-card hidden"></section>
+
+    <section class="section-head">
+      <h2>Day cards</h2>
+      <p>Sunrise → Sunset divided into 5 equal parts. Matching current time is highlighted.</p>
+    </section>
+    <section id="dayCards" class="cards"></section>
+
+    <section class="section-head">
+      <h2>Night cards</h2>
+      <p>Sunset → next sunrise divided into 5 equal parts.</p>
+    </section>
+    <section id="nightCards" class="cards"></section>
+  </main>
+
+  <script src="assets/js/sun.js?v=008"></script>
+  <script src="assets/js/app.js?v=008"></script>
 </body>
 </html>

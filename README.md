@@ -1,12 +1,9 @@
-# panchapatchi.com
+# Panchapatchi Card Model v008
 
-GitHub Pages static front page trial build.
+GitHub Pages static trial project.
 
-- No hero card
-- 30 moon blocks
-- Each block = 12 degrees
-- Block 0 / dark new moon = 3 o'clock
-- Block 15 / full moon = 9 o'clock
-- Uses Sun angle - Moon angle
-- Mobile friendly
-- No-cache meta while building
+- No manual sunrise input.
+- Uses browser geolocation to calculate sunrise and sunset.
+- Day and night each divide into 5 parts.
+- Each part divides into 5 sub-parts.
+- Current matching time card is highlighted.
