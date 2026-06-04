@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+# Change to Allow: / after the site is fully built.
