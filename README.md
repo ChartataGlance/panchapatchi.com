@@ -1,10 +1,8 @@
-# Panchapatchi v010
+# Panchapatchi v011
 
-GitHub Pages static trial version.
+GitHub Pages static project.
 
-- Front page immediately shows current bird and activity.
-- Moon transitions to current 30-block position.
-- 3 o'clock = New/Dark Moon, 9 o'clock = Full Moon.
-- Tree drill-down: Moon → Weekday → Day/Night → Part → Sub Part → Activity.
-- Day/night uses visitor location for sunrise and sunset.
-- No cache meta while in build/trial mode.
+This version is a true expandable tree:
+Moon -> Weekday -> Day/Night -> Part -> Sub Part -> 5 Activities.
+
+During trial and error robots.txt blocks indexing.

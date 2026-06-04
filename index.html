@@ -5,55 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>Panchapatchi Live</title>
-  <meta name="description" content="Live Panchapatchi bird and activity based on moon phase, weekday, sunrise, sunset and current time." />
-  <link rel="stylesheet" href="assets/css/style.css?v=010" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Panchapatchi Tree v011</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=011" />
 </head>
 <body>
   <main class="app-shell">
-    <section class="live-card" id="liveCard">
-      <div class="top-line">
-        <span class="pill" id="moonPhaseLabel">Calculating moon...</span>
-        <span class="pill" id="dayPeriodLabel">Location needed</span>
+    <section class="top-card">
+      <div>
+        <p class="eyebrow">Panchapatchi Live</p>
+        <h1>Current Bird & Activity</h1>
       </div>
-
-      <div class="moon-stage" aria-label="Moon transition and 30 blocks">
-        <div class="orbit" id="orbit">
-          <div class="axis axis-horizontal"></div>
-          <div class="axis axis-vertical"></div>
-          <span class="orbit-label new-label">New<br><b>3 o’clock</b></span>
-          <span class="orbit-label full-label">Full<br><b>9 o’clock</b></span>
-          <div class="moon-pointer" id="moonPointer"><span id="moonFace">🌑</span></div>
-        </div>
-      </div>
-
-      <div class="current-result">
-        <div class="bird-badge" id="birdIcon">🐓</div>
-        <div>
-          <h1 id="currentTitle">Finding current Panchapatchi</h1>
-          <p id="currentSub">Allow location to calculate sunrise and sunset.</p>
-        </div>
-      </div>
-
-      <div class="time-grid">
-        <div><span>From</span><strong id="fromTime">--:--:--</strong></div>
-        <div><span>To</span><strong id="toTime">--:--:--</strong></div>
-        <div><span>Duration</span><strong id="durationTime">--:--:--</strong></div>
-        <div><span>Seconds</span><strong id="secondsTime">---</strong></div>
-      </div>
-
-      <button class="primary-btn" id="locBtn">Use my location</button>
-      <button class="ghost-btn" id="toggleTree">View full Panchapatchi tree</button>
+      <button id="locateBtn" class="btn">Use My Location</button>
     </section>
 
-    <section class="tree-panel" id="treePanel" hidden>
-      <h2>Full Panchapatchi Tree</h2>
-      <p class="muted">Moon → Weekday → Day/Night → Part → Sub Part → Activity</p>
-      <div id="treeOutput" class="tree-output"></div>
+    <section class="moon-card">
+      <div class="moon-orbit" id="moonOrbit" aria-label="30 moon blocks"></div>
+      <div class="moon-info">
+        <strong id="moonLabel">Moon loading…</strong>
+        <span id="moonMeta">30 blocks · 12° each</span>
+      </div>
+    </section>
+
+    <section id="currentCard" class="current-card">
+      <div class="patchi-big" id="currentIcon">🐓</div>
+      <div>
+        <p class="eyebrow" id="currentPath">Moon → Day → Part → Sub → Activity</p>
+        <h2 id="currentTitle">Calculating current activity…</h2>
+        <p id="currentTime">Allow location or use fallback times.</p>
+      </div>
+    </section>
+
+    <section class="tree-wrap">
+      <div class="section-head">
+        <h2>Full Panchapatchi Tree</h2>
+        <p>Moon → Weekday → Day/Night → Part → Sub → Activity</p>
+      </div>
+      <div id="tree" class="tree"></div>
     </section>
   </main>
-
-  <script src="assets/js/app.js?v=010"></script>
+  <script src="assets/js/app.js?v=011"></script>
 </body>
 </html>
