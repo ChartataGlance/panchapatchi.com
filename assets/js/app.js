@@ -18,6 +18,11 @@ function pad(n){return String(n).padStart(2,'0')}
 function fmtTime(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}
 function fmtDur(ms){const s=Math.round(ms/1000);const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return `${pad(h)}:${pad(m)}:${pad(sec)} (${s} sec)`}
 function addMs(d,ms){return new Date(d.getTime()+ms)}
+function weekdayName(d){return d.toLocaleDateString(undefined,{weekday:'long'})}
+function fakeMoonDeg(i,type,sub=0){
+  const base = type === 'Day' ? i * 12 : 180 + i * 12;
+  return `${Math.round((base + sub * 2.4) % 360)}°`;
+}
 function buildParts(start,end,birds,type){
   const total = end - start;
   const partMs = total / 5;
@@ -29,18 +34,22 @@ function buildParts(start,end,birds,type){
       index:j+1,
       from:addMs(from,subMs*j),
       to:j===4?new Date(to):addMs(from,subMs*(j+1)),
-      duration:subMs
+      duration:subMs,
+      moonDeg:fakeMoonDeg(i,type,j),
+      weekday:weekdayName(from),
+      business:b.activity
     }));
-    return { index:i+1, type, ...b, from, to, duration:to-from, subparts };
+    return { index:i+1, type, ...b, from, to, duration:to-from, subparts, moonDeg:fakeMoonDeg(i,type), weekday:weekdayName(from), business:b.activity };
   });
 }
 function renderCards(containerId, parts, now){
   $(containerId).innerHTML = parts.map(p=>{
     const active = now >= p.from && now < p.to;
-    return `<article class="patchi-card ${active?'active':''}">
+    return `<article class="patchi-card ${p.type==='Day'?'day-card':'night-card'} part-${p.index} ${active?'active':''}">
       <span class="badge ${active?'live':''}">${active?'LIVE NOW':'Part '+p.index}</span>
       <h3>Part ${p.index}</h3>
-      <div class="bird-row"><div class="bird-icon">${p.icon}</div><div><strong>${p.bird}</strong><div class="activity">${p.activity}</div></div></div>
+      <div class="bird-row"><div class="bird-icon" aria-label="${p.bird} image">${p.icon}</div><div><strong>${p.bird}</strong><div class="activity">${p.activity}</div></div></div>
+      <div class="meta-line"><span class="chip">${p.weekday}</span><span class="chip">Moon ${p.moonDeg}</span><span class="chip">${p.business}</span></div>
       <div class="timebox">
         <div><span>From</span><strong>${fmtTime(p.from)}</strong></div>
         <div><span>To / till</span><strong>${fmtTime(p.to)}</strong></div>
@@ -48,7 +57,7 @@ function renderCards(containerId, parts, now){
       </div>
       <details class="subs">
         <summary>Open 5 sub-parts</summary>
-        ${p.subparts.map(s=>`<div class="sub-row"><strong>${s.index}</strong><small>${fmtTime(s.from)} → ${fmtTime(s.to)}<br>Total ${fmtDur(s.duration)}</small></div>`).join('')}
+        ${p.subparts.map(s=>`<div class="sub-row"><strong>${s.index}</strong><small>Moon ${s.moonDeg} · ${s.weekday} · ${p.icon} · ${s.business}<br>${fmtTime(s.from)} → ${fmtTime(s.to)}<br>Total ${fmtDur(s.duration)}</small></div>`).join('')}
       </details>
     </article>`;
   }).join('');
@@ -61,7 +70,7 @@ function renderCurrent(dayParts, nightParts, now){
   card.classList.remove('hidden');
   const sub = active.subparts.find(s=>now>=s.from && now<s.to);
   card.innerHTML = `<h2>${active.icon} Current matching card: ${active.bird} / ${active.activity}</h2>
-    <p><strong>${active.type}</strong> Part ${active.index}: ${fmtTime(active.from)} → ${fmtTime(active.to)} | Total ${fmtDur(active.duration)}</p>
+    <p><strong>${active.type}</strong> Part ${active.index}: ${fmtTime(active.from)} → ${fmtTime(active.to)} | Total ${fmtDur(active.duration)}</p><p>${active.weekday} · Moon ${active.moonDeg} · ${active.business}</p>
     <p>${sub ? `Current sub-part ${sub.index}: ${fmtTime(sub.from)} → ${fmtTime(sub.to)} | Total ${fmtDur(sub.duration)}` : ''}</p>`;
   $('periodText').textContent = `${active.type} Part ${active.index}`;
 }
