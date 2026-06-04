@@ -1,9 +1,10 @@
-# Panchapatchi Card Model v008
+# Panchapatchi v010
 
-GitHub Pages static trial project.
+GitHub Pages static trial version.
 
-- No manual sunrise input.
-- Uses browser geolocation to calculate sunrise and sunset.
-- Day and night each divide into 5 parts.
-- Each part divides into 5 sub-parts.
-- Current matching time card is highlighted.
+- Front page immediately shows current bird and activity.
+- Moon transitions to current 30-block position.
+- 3 o'clock = New/Dark Moon, 9 o'clock = Full Moon.
+- Tree drill-down: Moon → Weekday → Day/Night → Part → Sub Part → Activity.
+- Day/night uses visitor location for sunrise and sunset.
+- No cache meta while in build/trial mode.

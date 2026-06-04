@@ -1,111 +1,17 @@
-const birdsDay = [
-  { bird:'Cock', activity:'Rule', icon:'🐓' },
-  { bird:'Peacock', activity:'Eat', icon:'🦚' },
-  { bird:'Vulture', activity:'Walk', icon:'🦅' },
-  { bird:'Owl', activity:'Sleep', icon:'🦉' },
-  { bird:'Crow', activity:'Death', icon:'🐦‍⬛' }
-];
-const birdsNight = [
-  { bird:'Cock', activity:'Eat', icon:'🐓' },
-  { bird:'Peacock', activity:'Walk', icon:'🦚' },
-  { bird:'Vulture', activity:'Sleep', icon:'🦅' },
-  { bird:'Owl', activity:'Death', icon:'🦉' },
-  { bird:'Crow', activity:'Rule', icon:'🐦‍⬛' }
-];
-const $ = (id)=>document.getElementById(id);
-let currentSchedule = null;
-function pad(n){return String(n).padStart(2,'0')}
-function fmtTime(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}
-function fmtDur(ms){const s=Math.round(ms/1000);const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return `${pad(h)}:${pad(m)}:${pad(sec)} (${s} sec)`}
-function addMs(d,ms){return new Date(d.getTime()+ms)}
-function weekdayName(d){return d.toLocaleDateString(undefined,{weekday:'long'})}
-function fakeMoonDeg(i,type,sub=0){
-  const base = type === 'Day' ? i * 12 : 180 + i * 12;
-  return `${Math.round((base + sub * 2.4) % 360)}°`;
-}
-function buildParts(start,end,birds,type){
-  const total = end - start;
-  const partMs = total / 5;
-  return birds.map((b,i)=>{
-    const from = addMs(start, partMs*i);
-    const to = i===4 ? new Date(end) : addMs(start, partMs*(i+1));
-    const subMs = (to-from)/5;
-    const subparts = Array.from({length:5},(_,j)=>({
-      index:j+1,
-      from:addMs(from,subMs*j),
-      to:j===4?new Date(to):addMs(from,subMs*(j+1)),
-      duration:subMs,
-      moonDeg:fakeMoonDeg(i,type,j),
-      weekday:weekdayName(from),
-      business:b.activity
-    }));
-    return { index:i+1, type, ...b, from, to, duration:to-from, subparts, moonDeg:fakeMoonDeg(i,type), weekday:weekdayName(from), business:b.activity };
-  });
-}
-function renderCards(containerId, parts, now){
-  $(containerId).innerHTML = parts.map(p=>{
-    const active = now >= p.from && now < p.to;
-    return `<article class="patchi-card ${p.type==='Day'?'day-card':'night-card'} part-${p.index} ${active?'active':''}">
-      <span class="badge ${active?'live':''}">${active?'LIVE NOW':'Part '+p.index}</span>
-      <h3>Part ${p.index}</h3>
-      <div class="bird-row"><div class="bird-icon" aria-label="${p.bird} image">${p.icon}</div><div><strong>${p.bird}</strong><div class="activity">${p.activity}</div></div></div>
-      <div class="meta-line"><span class="chip">${p.weekday}</span><span class="chip">Moon ${p.moonDeg}</span><span class="chip">${p.business}</span></div>
-      <div class="timebox">
-        <div><span>From</span><strong>${fmtTime(p.from)}</strong></div>
-        <div><span>To / till</span><strong>${fmtTime(p.to)}</strong></div>
-        <div><span>Total</span><strong>${fmtDur(p.duration)}</strong></div>
-      </div>
-      <details class="subs">
-        <summary>Open 5 sub-parts</summary>
-        ${p.subparts.map(s=>`<div class="sub-row"><strong>${s.index}</strong><small>Moon ${s.moonDeg} · ${s.weekday} · ${p.icon} · ${s.business}<br>${fmtTime(s.from)} → ${fmtTime(s.to)}<br>Total ${fmtDur(s.duration)}</small></div>`).join('')}
-      </details>
-    </article>`;
-  }).join('');
-}
-function findActive(parts, now){return parts.find(p=>now>=p.from && now<p.to)}
-function renderCurrent(dayParts, nightParts, now){
-  const active = findActive(dayParts, now) || findActive(nightParts, now);
-  const card = $('currentCard');
-  if(!active){card.classList.add('hidden');return}
-  card.classList.remove('hidden');
-  const sub = active.subparts.find(s=>now>=s.from && now<s.to);
-  card.innerHTML = `<h2>${active.icon} Current matching card: ${active.bird} / ${active.activity}</h2>
-    <p><strong>${active.type}</strong> Part ${active.index}: ${fmtTime(active.from)} → ${fmtTime(active.to)} | Total ${fmtDur(active.duration)}</p><p>${active.weekday} · Moon ${active.moonDeg} · ${active.business}</p>
-    <p>${sub ? `Current sub-part ${sub.index}: ${fmtTime(sub.from)} → ${fmtTime(sub.to)} | Total ${fmtDur(sub.duration)}` : ''}</p>`;
-  $('periodText').textContent = `${active.type} Part ${active.index}`;
-}
-function renderSchedule(sunrise, sunset){
-  const now = new Date();
-  const tomorrowSunrise = new Date(sunrise); tomorrowSunrise.setDate(tomorrowSunrise.getDate()+1);
-  const dayParts = buildParts(sunrise, sunset, birdsDay, 'Day');
-  const nightParts = buildParts(sunset, tomorrowSunrise, birdsNight, 'Night');
-  currentSchedule = {dayParts, nightParts};
-  $('sunriseText').textContent = fmtTime(sunrise);
-  $('sunsetText').textContent = fmtTime(sunset);
-  renderCards('dayCards', dayParts, now);
-  renderCards('nightCards', nightParts, now);
-  renderCurrent(dayParts, nightParts, now);
-}
-function tick(){
-  $('clock').textContent = fmtTime(new Date());
-  if(currentSchedule){renderCurrent(currentSchedule.dayParts,currentSchedule.nightParts,new Date());}
-}
-setInterval(tick,1000); tick();
-$('demoBtn').addEventListener('click',()=>{
-  const d = new Date();
-  const sunrise = new Date(d.getFullYear(),d.getMonth(),d.getDate(),6,0,0);
-  const sunset = new Date(d.getFullYear(),d.getMonth(),d.getDate(),18,0,0);
-  $('locationStatus').textContent='Demo 06:00 → 18:00';
-  renderSchedule(sunrise,sunset);
-});
-$('useLocationBtn').addEventListener('click',()=>{
-  if(!navigator.geolocation){$('locationStatus').textContent='Geolocation not supported';return;}
-  $('locationStatus').textContent='Requesting permission...';
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const {latitude, longitude}=pos.coords;
-    const times = getSunTimes(new Date(), latitude, longitude);
-    if(!times.sunrise || !times.sunset){$('locationStatus').textContent='Sun time unavailable here today';return;}
-    $('locationStatus').textContent=`Lat ${latitude.toFixed(3)}, Lon ${longitude.toFixed(3)}`;
-    renderSchedule(new Date(times.sunrise), new Date(times.sunset));
-  },()=>{$('locationStatus').textContent='Location denied. Use demo button.'});
-});
+const BIRDS=[['Cock','🐓'],['Peacock','🦚'],['Vulture','🦅'],['Owl','🦉'],['Crow','🐦‍⬛']];
+const ACTIVITIES=['Rule','Eat','Walk','Sleep','Death'];
+const els={orbit:document.getElementById('orbit'),moonPointer:document.getElementById('moonPointer'),moonFace:document.getElementById('moonFace'),moonPhaseLabel:document.getElementById('moonPhaseLabel'),dayPeriodLabel:document.getElementById('dayPeriodLabel'),birdIcon:document.getElementById('birdIcon'),currentTitle:document.getElementById('currentTitle'),currentSub:document.getElementById('currentSub'),fromTime:document.getElementById('fromTime'),toTime:document.getElementById('toTime'),durationTime:document.getElementById('durationTime'),secondsTime:document.getElementById('secondsTime'),locBtn:document.getElementById('locBtn'),toggleTree:document.getElementById('toggleTree'),treePanel:document.getElementById('treePanel'),treeOutput:document.getElementById('treeOutput')};
+let lastData=null;
+function pad(n){return String(n).padStart(2,'0')}function fmt(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}function dur(sec){sec=Math.round(sec);return `${pad(Math.floor(sec/3600))}:${pad(Math.floor(sec%3600/60))}:${pad(sec%60)}`}
+function addSec(d,s){return new Date(d.getTime()+s*1000)}
+function dayOfYear(d){return Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(d.getFullYear(),0,0))/86400000)}
+function sunriseSunset(date,lat,lon,rise=true){const zenith=90.833;const N=dayOfYear(date);const lngHour=lon/15;let t=N+(((rise?6:18)-lngHour)/24);let M=(0.9856*t)-3.289;let L=M+(1.916*Math.sin(M*Math.PI/180))+(0.020*Math.sin(2*M*Math.PI/180))+282.634;L=(L+360)%360;let RA=Math.atan(0.91764*Math.tan(L*Math.PI/180))*180/Math.PI;RA=(RA+360)%360;RA+=(Math.floor(L/90)*90)-(Math.floor(RA/90)*90);RA/=15;let sinDec=0.39782*Math.sin(L*Math.PI/180);let cosDec=Math.cos(Math.asin(sinDec));let cosH=(Math.cos(zenith*Math.PI/180)-(sinDec*Math.sin(lat*Math.PI/180)))/(cosDec*Math.cos(lat*Math.PI/180));if(cosH>1||cosH<-1)return null;let H=rise?360-Math.acos(cosH)*180/Math.PI:Math.acos(cosH)*180/Math.PI;H/=15;let T=H+RA-(0.06571*t)-6.622;let UT=(T-lngHour+24)%24;let utc=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,0,0));return new Date(utc.getTime()+UT*3600000)}
+function moonPhaseAngle(date){const synodic=29.530588853;const knownNew=Date.UTC(2000,0,6,18,14,0);const days=(date.getTime()-knownNew)/86400000;const age=((days%synodic)+synodic)%synodic;return (age/synodic)*360} // approximation representing Moon-Sun angle
+function buildOrbit(angle){els.orbit.querySelectorAll('.block').forEach(n=>n.remove());const rect=els.orbit.getBoundingClientRect();const size=rect.width||360;const cx=size/2,cy=size/2,r=size*.43;const active=Math.floor(angle/12)%30;for(let i=0;i<30;i++){const a=i*12*Math.PI/180;const x=cx+r*Math.cos(a),y=cy-r*Math.sin(a);const b=document.createElement('div');b.className='block '+(i===active?'active ': '')+(i<15?'wax':i===15?'fullside':'wane');b.style.left=x+'px';b.style.top=y+'px';b.textContent=i;els.orbit.appendChild(b)}const rad=angle*Math.PI/180;const x=r*Math.cos(rad),y=-r*Math.sin(rad);els.moonPointer.classList.remove('spin');void els.moonPointer.offsetWidth;els.moonPointer.classList.add('spin');els.moonPointer.style.transform=`translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;const illum=(1-Math.cos(angle*Math.PI/180))/2;els.moonFace.textContent=illum<.08?'🌑':illum<.35?'🌒':illum<.65?'🌓':illum<.92?'🌔':angle<220?'🌕':'🌖'}
+function makeSchedule(now,sunrise,sunset,angle){const nextSunrise=addSec(sunrise,24*3600);const isDay=now>=sunrise&&now<sunset;const start=isDay?sunrise:sunset;const end=isDay?sunset:nextSunrise;const total=(end-start)/1000;const partLen=total/5;const subLen=partLen/5;const actLen=subLen/5;const partIndex=Math.min(4,Math.max(0,Math.floor((now-start)/1000/partLen)));const subIndex=Math.min(4,Math.max(0,Math.floor(((now-start)/1000-partIndex*partLen)/subLen)));const actIndex=Math.min(4,Math.max(0,Math.floor(((now-start)/1000-partIndex*partLen-subIndex*subLen)/actLen)));return {isDay,start,end,total,partLen,subLen,actLen,partIndex,subIndex,actIndex,angle}}
+function render(data){lastData=data;const {now,sunrise,sunset,angle,schedule}=data;buildOrbit(angle);const weekday=now.toLocaleDateString(undefined,{weekday:'long'});const moonType=angle<180?'Waxing 0°→180°':'Waning 180°→360°';const bird=BIRDS[schedule.partIndex];const activity=ACTIVITIES[schedule.actIndex];const actStart=addSec(schedule.start,schedule.partIndex*schedule.partLen+schedule.subIndex*schedule.subLen+schedule.actIndex*schedule.actLen);const actEnd=addSec(actStart,schedule.actLen);document.body.classList.toggle('night',!schedule.isDay);els.moonPhaseLabel.textContent=`${moonType} · ${Math.round(angle)}° · Block ${Math.floor(angle/12)%30}`;els.dayPeriodLabel.textContent=`${weekday} · ${schedule.isDay?'Day':'Night'}`;els.birdIcon.textContent=bird[1];els.currentTitle.textContent=`${bird[0]} · ${activity}`;els.currentSub.textContent=`ACTIVE NOW · Part ${schedule.partIndex+1}, Sub ${schedule.subIndex+1}, Activity ${schedule.actIndex+1}`;els.fromTime.textContent=fmt(actStart);els.toTime.textContent=fmt(actEnd);els.durationTime.textContent=dur(schedule.actLen);els.secondsTime.textContent=Math.round(schedule.actLen);renderTree(data)}
+function renderTree(data){const s=data.schedule;let html='';for(let p=0;p<5;p++){const bird=BIRDS[p];const pStart=addSec(s.start,p*s.partLen),pEnd=addSec(pStart,s.partLen);html+=`<article class="part-card ${p===s.partIndex?'active':''}"><h3>Part ${p+1}: ${bird[1]} ${bird[0]}</h3><p>${fmt(pStart)} → ${fmt(pEnd)} · ${dur(s.partLen)} · ${Math.round(s.partLen)} sec</p><div class="sub-list">`;for(let sub=0;sub<5;sub++){const subStart=addSec(pStart,sub*s.subLen),subEnd=addSec(subStart,s.subLen);html+=`<div class="sub-card ${p===s.partIndex&&sub===s.subIndex?'active':''}"><b>Sub ${sub+1}</b> ${fmt(subStart)} → ${fmt(subEnd)} · ${dur(s.subLen)}<div>`;for(let a=0;a<5;a++){const aStart=addSec(subStart,a*s.actLen),aEnd=addSec(aStart,s.actLen);html+=`<div class="activity-row ${p===s.partIndex&&sub===s.subIndex&&a===s.actIndex?'active':''}"><span>${a+1}</span><b>${ACTIVITIES[a]}</b><small>${fmt(aStart)} → ${fmt(aEnd)}</small></div>`}html+='</div></div>'}html+='</div></article>'}els.treeOutput.innerHTML=html}
+function start(lat=51.5072,lon=-0.1276){const now=new Date();const sunrise=sunriseSunset(now,lat,lon,true);const sunset=sunriseSunset(now,lat,lon,false);const angle=moonPhaseAngle(now);const schedule=makeSchedule(now,sunrise,sunset,angle);render({now,sunrise,sunset,angle,schedule,lat,lon})}
+els.locBtn.onclick=()=>{if(!navigator.geolocation){start();return}els.locBtn.textContent='Finding location...';navigator.geolocation.getCurrentPosition(pos=>{els.locBtn.textContent='Refresh live calculation';start(pos.coords.latitude,pos.coords.longitude)},()=>{els.locBtn.textContent='Using London fallback';start()},{enableHighAccuracy:true,timeout:8000})};
+els.toggleTree.onclick=()=>{els.treePanel.hidden=!els.treePanel.hidden;els.toggleTree.textContent=els.treePanel.hidden?'View full Panchapatchi tree':'Hide full Panchapatchi tree';if(lastData)renderTree(lastData)};
+start();setInterval(()=>{if(lastData)start(lastData.lat,lastData.lon)},30000);

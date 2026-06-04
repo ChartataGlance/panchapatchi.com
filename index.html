@@ -3,66 +3,57 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Panchapatchi Sky Card Model</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=009" />
+  <title>Panchapatchi Live</title>
+  <meta name="description" content="Live Panchapatchi bird and activity based on moon phase, weekday, sunrise, sunset and current time." />
+  <link rel="stylesheet" href="assets/css/style.css?v=010" />
 </head>
 <body>
   <main class="app-shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Panchapatchi trial model</p>
-        <h1>Today Panchapatchi Sky Cards</h1>
+    <section class="live-card" id="liveCard">
+      <div class="top-line">
+        <span class="pill" id="moonPhaseLabel">Calculating moon...</span>
+        <span class="pill" id="dayPeriodLabel">Location needed</span>
       </div>
-      <div class="clock-card">
-        <span id="clock">--:--:--</span>
-        <small>Current time</small>
+
+      <div class="moon-stage" aria-label="Moon transition and 30 blocks">
+        <div class="orbit" id="orbit">
+          <div class="axis axis-horizontal"></div>
+          <div class="axis axis-vertical"></div>
+          <span class="orbit-label new-label">New<br><b>3 o’clock</b></span>
+          <span class="orbit-label full-label">Full<br><b>9 o’clock</b></span>
+          <div class="moon-pointer" id="moonPointer"><span id="moonFace">🌑</span></div>
+        </div>
       </div>
-    </header>
 
-    <section class="status-grid">
-      <article class="status-card">
-        <span>Location</span>
-        <strong id="locationStatus">Waiting for location</strong>
-      </article>
-      <article class="status-card">
-        <span>Sunrise</span>
-        <strong id="sunriseText">--:--:--</strong>
-      </article>
-      <article class="status-card">
-        <span>Sunset</span>
-        <strong id="sunsetText">--:--:--</strong>
-      </article>
-      <article class="status-card">
-        <span>Now period</span>
-        <strong id="periodText">--</strong>
-      </article>
+      <div class="current-result">
+        <div class="bird-badge" id="birdIcon">🐓</div>
+        <div>
+          <h1 id="currentTitle">Finding current Panchapatchi</h1>
+          <p id="currentSub">Allow location to calculate sunrise and sunset.</p>
+        </div>
+      </div>
+
+      <div class="time-grid">
+        <div><span>From</span><strong id="fromTime">--:--:--</strong></div>
+        <div><span>To</span><strong id="toTime">--:--:--</strong></div>
+        <div><span>Duration</span><strong id="durationTime">--:--:--</strong></div>
+        <div><span>Seconds</span><strong id="secondsTime">---</strong></div>
+      </div>
+
+      <button class="primary-btn" id="locBtn">Use my location</button>
+      <button class="ghost-btn" id="toggleTree">View full Panchapatchi tree</button>
     </section>
 
-    <section class="controls-card">
-      <button id="useLocationBtn">Use my location</button>
-      <button id="demoBtn" class="secondary">Use demo time</button>
-      <p>No sunrise input needed. Sunrise and sunset are calculated from visitor location. Sky colours show day, sunset and night periods.</p>
+    <section class="tree-panel" id="treePanel" hidden>
+      <h2>Full Panchapatchi Tree</h2>
+      <p class="muted">Moon → Weekday → Day/Night → Part → Sub Part → Activity</p>
+      <div id="treeOutput" class="tree-output"></div>
     </section>
-
-    <section id="currentCard" class="current-card hidden"></section>
-
-    <section class="section-head">
-      <h2>Day cards</h2>
-      <p>Sunrise → Sunset divided into 5 equal parts. Matching current time is highlighted.</p>
-    </section>
-    <section id="dayCards" class="cards"></section>
-
-    <section class="section-head">
-      <h2>Night cards</h2>
-      <p>Sunset → next sunrise divided into 5 equal parts.</p>
-    </section>
-    <section id="nightCards" class="cards"></section>
   </main>
 
-  <script src="assets/js/sun.js?v=009"></script>
-  <script src="assets/js/app.js?v=009"></script>
+  <script src="assets/js/app.js?v=010"></script>
 </body>
 </html>
