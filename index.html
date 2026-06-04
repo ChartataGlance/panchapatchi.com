@@ -3,47 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
-  <meta name="robots" content="noindex,nofollow" />
-  <title>Panchapatchi Tree v011</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=011" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Panchapatchi Live Tree</title>
+  <meta name="description" content="Panchapatchi live tree with waxing day, waxing night, waning day, and waning night timing tables." />
+  <link rel="stylesheet" href="assets/css/style.css?v=013" />
 </head>
 <body>
-  <main class="app-shell">
-    <section class="top-card">
+  <main class="app">
+    <section class="topbar">
       <div>
-        <p class="eyebrow">Panchapatchi Live</p>
+        <p class="eyebrow">Panchapatchi Live Tree</p>
         <h1>Current Bird & Activity</h1>
+        <p id="statusText" class="muted">Using demo sunrise until location is allowed.</p>
       </div>
-      <button id="locateBtn" class="btn">Use My Location</button>
+      <button id="locBtn">Use My Location</button>
+    </section>
+
+    <section class="current-card" id="currentCard">
+      <div class="bird-orb" id="currentIcon">🌙</div>
+      <div class="current-main">
+        <p class="eyebrow" id="currentPath">Moon → Weekday → Day/Night → Part → Activity</p>
+        <h2 id="currentTitle">Waiting for location</h2>
+        <p class="time-line" id="currentTime">--:--:-- → --:--:--</p>
+        <p class="muted" id="currentDuration">Duration --</p>
+      </div>
+      <span class="live-pill">LIVE NOW</span>
     </section>
 
     <section class="moon-card">
-      <div class="moon-orbit" id="moonOrbit" aria-label="30 moon blocks"></div>
-      <div class="moon-info">
-        <strong id="moonLabel">Moon loading…</strong>
-        <span id="moonMeta">30 blocks · 12° each</span>
+      <div class="section-title">
+        <h2>Moon Transition</h2>
+        <p id="moonInfo" class="muted">3 o’clock = New/Dark moon · 9 o’clock = Full moon</p>
       </div>
+      <div class="orbit" id="orbit" aria-label="Moon phase orbit with 30 blocks"></div>
     </section>
 
-    <section id="currentCard" class="current-card">
-      <div class="patchi-big" id="currentIcon">🐓</div>
-      <div>
-        <p class="eyebrow" id="currentPath">Moon → Day → Part → Sub → Activity</p>
-        <h2 id="currentTitle">Calculating current activity…</h2>
-        <p id="currentTime">Allow location or use fallback times.</p>
+    <section class="tree-panel">
+      <div class="section-title">
+        <h2>Full Tree</h2>
+        <p class="muted">Moon → Today → Day/Night → Part → 5 activity rows. Correct table changes for waxing/waning and day/night.</p>
       </div>
-    </section>
-
-    <section class="tree-wrap">
-      <div class="section-head">
-        <h2>Full Panchapatchi Tree</h2>
-        <p>Moon → Weekday → Day/Night → Part → Sub → Activity</p>
-      </div>
-      <div id="tree" class="tree"></div>
+      <div id="tree"></div>
     </section>
   </main>
-  <script src="assets/js/app.js?v=011"></script>
+  <script src="assets/js/app.js?v=013"></script>
 </body>
 </html>
