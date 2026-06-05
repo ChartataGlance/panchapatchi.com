@@ -1,8 +1,3 @@
-# Panchapatchi v011
+# Sarakalai Panchapatchi v028
 
-GitHub Pages static project.
-
-This version is a true expandable tree:
-Moon -> Weekday -> Day/Night -> Part -> Sub Part -> 5 Activities.
-
-During trial and error robots.txt blocks indexing.
+Saved timing method with localStorage. Successful location stores lat/lon, hides timing choice buttons on next visit, and provides Change timing method.

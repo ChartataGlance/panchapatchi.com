@@ -1,53 +1,14 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>Panchapatchi Live Tree v014</title>
-  <meta name="description" content="Panchapatchi live tree with waxing day, waxing night, waning day, and waning night timing tables." />
-  <link rel="stylesheet" href="assets/css/style.css?v=014" />
-</head>
-<body>
-  <main class="app">
-    <section class="topbar">
-      <div>
-        <p class="eyebrow">Panchapatchi Live Tree v014</p>
-        <h1>Current Bird & Activity</h1>
-        <p id="statusText" class="muted">Using demo sunrise until location is allowed.</p>
-      </div>
-      <button id="locBtn">Use My Location</button>
-    </section>
-
-    <section class="current-card" id="currentCard">
-      <div class="bird-orb" id="currentIcon">🌙</div>
-      <div class="current-main">
-        <p class="eyebrow" id="currentPath">Moon → Weekday → Day/Night → Part → Activity</p>
-        <h2 id="currentTitle">Waiting for location</h2>
-        <p class="time-line" id="currentTime">--:--:-- → --:--:--</p>
-        <p class="muted" id="currentDuration">Duration --</p>
-      </div>
-      <span class="live-pill">LIVE NOW</span>
-    </section>
-
-    <section class="moon-card">
-      <div class="section-title">
-        <h2>Moon Transition</h2>
-        <p id="moonInfo" class="muted">3 o’clock = New/Dark moon · 9 o’clock = Full moon</p>
-      </div>
-      <div class="orbit" id="orbit" aria-label="Moon phase orbit with 30 blocks"></div>
-    </section>
-
-    <section class="tree-panel">
-      <div class="section-title">
-        <h2>Full Tree</h2>
-        <p class="muted">Moon → Today → Day/Night → Part → 5 activity rows. Correct table changes for waxing/waning and day/night.</p>
-      </div>
-      <div id="tree"></div>
-    </section>
-  </main>
-  <script src="assets/js/app.js?v=014"></script>
-</body>
-</html>
+<!doctype html><html lang="ta"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sarakalai Panchapatchi</title><link rel="stylesheet" href="assets/css/style.css"></head><body><nav class="nav"><div class="nav-inner"><div class="brand">🌙 Sarakalai Panchapatchi</div><div class="menu"><a class="btn" href="index.html">Home</a><a class="btn" href="rising.html">Rising 7 Days</a><a class="btn" href="waning.html">Waning 7 Days</a><a class="btn" href="reference.html">Reference</a></div></div></nav><main class="wrap">
+<section class="live-card">
+  <div class="live-card-head">
+    <div><h1 id="moonPhaseTitle">பஞ்சபட்சி நேரம்</h1><div class="tithi-title" id="tithiTitle">திதி கணக்கிடுகிறது...</div></div>
+    <button id="changeTimingBtn" class="tiny-btn">⚙ Timing</button>
+  </div>
+  <div class="live-section"><div class="tithi-strip" id="tithiStrip"></div><div class="tithi-caption" id="tithiCaption">Active tithi highlighted</div></div>
+  <div class="live-section"><div class="live-info-grid"><div><small>ராசி</small><b id="rasiText">--</b></div><div><small>நட்சத்திரம்</small><b id="nakText">--</b></div><div><small>பாதம்</small><b id="padaText">--</b></div><div><small>அதிபதி</small><b id="lordText">--</b></div></div></div>
+  <div class="live-section"><div class="role-inline"><div><small>இன்று</small><b id="todayText">--</b></div><div><small>Adhikara</small><b id="adhiText">--</b></div><div><small>Padupatchi</small><b id="paduText">--</b></div></div></div>
+  <div class="live-section"><div class="activity-live"><div class="bird-now" id="currentIcon">🕊️</div><div><div class="activity-name" id="currentTitle">Loading...</div><div class="remaining" id="countdownText">--:--</div><div class="duration-line" id="activityDurationText">--:-- total</div><div class="progress"><div class="bar" id="activityBar"></div></div><div class="percent-line" id="activityPercentText">0% complete</div><div class="inner-dots" id="innerDots"></div><div class="percent-line" id="innerText">Inner Part -- / 5</div></div></div><div class="stats"><div class="stat"><b>Sunrise / Sunset</b><span id="sunText">--</span></div><div class="stat"><b>Period</b><span id="periodText">--</span></div><div class="stat"><b>Samam</b><span id="samamText">--</span></div><div class="stat"><b>Time</b><span id="currentPath">--</span></div></div></div>
+  <div class="live-section" id="timingChoice"><div class="controls"><button class="primary" id="locateBtn">Use My Location</button><button id="manualBtn">Manual Sunrise/Sunset</button><button id="fallbackBtn">Traditional 6am/6pm</button></div><div class="input-panel" id="manualPanel" style="display:none"><b>Manual timing</b><br><input id="manualSunrise" type="time" step="1" value="06:00:00"><input id="manualSunset" type="time" step="1" value="18:00:00"><button class="primary" id="setManualBtn">Set Timing</button></div><div class="status"><b id="statusText">Loading</b><span id="statusDetails">Preparing.</span></div></div>
+</section>
+<section class="section"><div class="section-head"><h2>Cards from now to next week</h2><span class="badge">Scroll timeline</span></div><div class="pad"><div class="card-list" id="cardList"></div></div></section>
+</main><script src="assets/js/app.js"></script></body></html>

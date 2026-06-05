@@ -1,81 +1,177 @@
-function $(id){return document.getElementById(id)}
-function byId(id){return document.getElementById(id)}
-function setText(id,value){const el=byId(id); if(el) el.textContent=value ?? ''}
-function setHTML(id,value){const el=byId(id); if(el) el.innerHTML=value ?? ''}
-const BIRDS=[
-  {key:'cock',label:'Cock',icon:'🐓'},
-  {key:'peacock',label:'Peacock',icon:'🦚'},
-  {key:'vulture',label:'Vulture',icon:'🦅'},
-  {key:'owl',label:'Owl',icon:'🦉'},
-  {key:'crow',label:'Crow',icon:'🐦'}
-];
-const ACT={
-  rule:{label:'Rule',tamil:'அரசு',cls:'rule'},
-  eat:{label:'Eat',tamil:'ஊண்',cls:'eat'},
-  walk:{label:'Walk',tamil:'நடை',cls:'walk'},
-  sleep:{label:'Sleep',tamil:'துயில்',cls:'sleep'},
-  death:{label:'Death',tamil:'சாவு',cls:'death'}
-};
-const TABLES={
-  "rising_day": {
-    "1": [{"act":"eat","to":30},{"act":"walk","to":66},{"act":"rule","to":114},{"act":"sleep","to":132},{"act":"death","to":144}],
-    "2": [{"act":"walk","to":180},{"act":"rule","to":228},{"act":"sleep","to":246},{"act":"death","to":258},{"act":"eat","to":288}],
-    "3": [{"act":"rule","to":336},{"act":"sleep","to":354},{"act":"death","to":366},{"act":"eat","to":396},{"act":"walk","to":432}],
-    "4": [{"act":"sleep","to":450},{"act":"death","to":462},{"act":"eat","to":492},{"act":"walk","to":528},{"act":"rule","to":576}],
-    "5": [{"act":"death","to":588},{"act":"eat","to":618},{"act":"walk","to":654},{"act":"rule","to":702},{"act":"sleep","to":720}]
-  },
-  "rising_night": {
-    "1": [{"act":"eat","to":750},{"act":"rule","to":798},{"act":"death","to":810},{"act":"walk","to":846},{"act":"sleep","to":864}],
-    "2": [{"act":"rule","to":912},{"act":"death","to":924},{"act":"walk","to":960},{"act":"sleep","to":978},{"act":"eat","to":1008}],
-    "3": [{"act":"death","to":1020},{"act":"walk","to":1056},{"act":"sleep","to":1074},{"act":"eat","to":1104},{"act":"rule","to":1152}],
-    "4": [{"act":"walk","to":1188},{"act":"sleep","to":1206},{"act":"eat","to":1236},{"act":"rule","to":1284},{"act":"death","to":1296}],
-    "5": [{"act":"sleep","to":1314},{"act":"eat","to":1344},{"act":"rule","to":1392},{"act":"death","to":1404},{"act":"walk","to":1440}]
-  },
-  "waning_day": {
-    "1": [{"act":"eat","to":48},{"act":"death","to":78},{"act":"sleep","to":90},{"act":"rule","to":108},{"act":"walk","to":144}],
-    "2": [{"act":"death","to":174},{"act":"sleep","to":186},{"act":"rule","to":204},{"act":"walk","to":240},{"act":"eat","to":288}],
-    "3": [{"act":"sleep","to":300},{"act":"rule","to":318},{"act":"walk","to":354},{"act":"eat","to":402},{"act":"death","to":432}],
-    "4": [{"act":"rule","to":450},{"act":"walk","to":486},{"act":"eat","to":534},{"act":"death","to":564},{"act":"sleep","to":576}],
-    "5": [{"act":"walk","to":612},{"act":"eat","to":660},{"act":"death","to":690},{"act":"sleep","to":702},{"act":"rule","to":720}]
-  },
-  "waning_night": {
-    "1": [{"act":"eat","to":762},{"act":"sleep","to":780},{"act":"walk","to":822},{"act":"death","to":846},{"act":"rule","to":864}],
-    "2": [{"act":"sleep","to":882},{"act":"walk","to":924},{"act":"death","to":948},{"act":"rule","to":966},{"act":"eat","to":1008}],
-    "3": [{"act":"walk","to":1050},{"act":"death","to":1074},{"act":"rule","to":1092},{"act":"eat","to":1134},{"act":"sleep","to":1152}],
-    "4": [{"act":"death","to":1176},{"act":"rule","to":1194},{"act":"eat","to":1236},{"act":"sleep","to":1254},{"act":"walk","to":1296}],
-    "5": [{"act":"rule","to":1314},{"act":"eat","to":1356},{"act":"sleep","to":1374},{"act":"walk","to":1416},{"act":"death","to":1440}]
-  }
-};
-function pad(n){return String(Math.floor(n)).padStart(2,'0')}
-function hms(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}
-function minutesSince(a,b){return (b-a)/60000}
-function addMin(base,min){return new Date(base.getTime()+min*60000)}
-function duration(a,b){const s=Math.max(0,Math.round((b-a)/1000));return {s,hms:`${pad(s/3600)}:${pad((s%3600)/60)}:${pad(s%60)}`}}
-function dayName(d=new Date()){return d.toLocaleDateString('en-GB',{weekday:'long'})}
-function normalize360(x){return ((x%360)+360)%360}
-function julianDay(date){return date.getTime()/86400000+2440587.5}
-function sunLongitude(date){const n=julianDay(date)-2451545.0;const L=normalize360(280.46646+0.98564736*n);const g=normalize360(357.52911+0.98560028*n)*Math.PI/180;return normalize360(L+1.914602*Math.sin(g)+0.019993*Math.sin(2*g));}
-function moonLongitude(date){const n=julianDay(date)-2451545.0;const L=normalize360(218.316+13.176396*n);const M=normalize360(134.963+13.064993*n)*Math.PI/180;const D=normalize360(297.850+12.190749*n)*Math.PI/180;return normalize360(L+6.289*Math.sin(M)+1.274*Math.sin(2*D-M)+0.658*Math.sin(2*D));}
-function moonPhase(date){const phase=normalize360(moonLongitude(date)-sunLongitude(date));return {angle:phase,block:Math.round(phase/12)%30,kind:phase<180?'rising':'waning',name:phase<180?'Rising/Waxing Moon':'Waning Moon',illum:(1-Math.cos(phase*Math.PI/180))/2}}
-function buildFromTable(tableKey,baseSunrise){const table=TABLES[tableKey];let previous=tableKey.includes('night')?addMin(baseSunrise,720):baseSunrise;return Object.keys(table).map((partNo,idx)=>{const bird=BIRDS[idx];const rows=table[partNo].map((row,i)=>{const start=previous;const end=addMin(baseSunrise,row.to);previous=end;const du=duration(start,end);return {part:+partNo,sub:i+1,bird,act:row.act,activity:ACT[row.act],start,end,duration:du,toOffset:row.to};});return {part:+partNo,bird,start:rows[0].start,end:rows[rows.length-1].end,duration:duration(rows[0].start,rows[rows.length-1].end),rows};});}
-function chooseTable(phase,baseSunrise,now){let offset=minutesSince(baseSunrise,now);while(offset<0)offset+=1440;while(offset>=1440)offset-=1440;const period=offset<720?'day':'night';return {key:`${phase.kind}_${period}`,period,offset};}
-function findCurrent(parts,now){for(const part of parts){for(const row of part.rows){if(now>=row.start && now<row.end)return {part,row};}}return {part:parts[0],row:parts[0].rows[0]};}
-function renderCurrent(ctx){
-  const {phase,tablePick,current}=ctx;
-  if(!current || !current.row || !current.part) return;
-  const r=current.row;
-  setText('currentIcon', r.bird.icon);
-  setText('currentPath', `${phase.name} · ${dayName()} · ${tablePick.period.toUpperCase()} · Part ${current.part.part} · Sub ${r.sub}`);
-  setHTML('currentTitle', `${r.bird.label} · <span class="${r.activity.cls}">${r.activity.label}</span>`);
-  setText('currentTime', `${hms(r.start)} → ${hms(r.end)}`);
-  setText('currentDuration', `Duration ${r.duration.hms} · ${r.duration.s} sec · Table ${tablePick.key}`);
-  const card=byId('currentCard'); if(card) card.classList.add('active');
+
+const DAY_ORDER_TA=["ஞாயிறு","திங்கள்","செவ்வாய்","புதன்","வியாழன்","வெள்ளி","சனி"];
+const DAY_EN={"ஞாயிறு":"Sunday","திங்கள்":"Monday","செவ்வாய்":"Tuesday","புதன்":"Wednesday","வியாழன்":"Thursday","வெள்ளி":"Friday","சனி":"Saturday"};
+const CLS={Eat:'eat',Walk:'walk',Rule:'rule',Sleep:'sleep',Death:'death'};
+const TITHI=["","சுக்ல. பிரதமை","சுக்ல. த்விதியை","சுக்ல. த்ரிதியை","சுக்ல. சதுர்த்தி","சுக்ல. பஞ்சமி","சுக்ல. சஷ்டி","சுக்ல. சப்தமி","சுக்ல. அஷ்டமி","சுக்ல. நவமி","சுக்ல. தசமி","சுக்ல. ஏகாதசி","சுக்ல. த்வாதசி","சுக்ல. த்ரயோதசி","சுக்ல. சதுர்தசி","பௌர்ணமி","கிருஷ்ண. பிரதமை","கிருஷ்ண. த்விதியை","கிருஷ்ண. த்ரிதியை","கிருஷ்ண. சதுர்த்தி","கிருஷ்ண. பஞ்சமி","கிருஷ்ண. சஷ்டி","கிருஷ்ண. சப்தமி","கிருஷ்ண. அஷ்டமி","கிருஷ்ண. நவமி","கிருஷ்ண. தசமி","கிருஷ்ண. ஏகாதசி","கிருஷ்ண. த்வாதசி","கிருஷ்ண. த்ரயோதசி","கிருஷ்ண. சதுர்தசி","அமாவாசை"];
+const NAKSHATRAS=[["அஸ்வினி","Ashvini"],["பரணி","Bharani"],["கார்த்திகை","Krittika"],["ரோகிணி","Rohini"],["மிருகசீரிடம்","Mrigashirsha"],["திருவாதிரை","Ardra"],["புனர்பூசம்","Punarvasu"],["பூசம்","Pushya"],["ஆயில்யம்","Ashlesha"],["மகம்","Magha"],["பூரம்","Purva Phalguni"],["உத்திரம்","Uttara Phalguni"],["ஹஸ்தம்","Hasta"],["சித்திரை","Chitra"],["சுவாதி","Swati"],["விசாகம்","Vishakha"],["அனுசம்","Anuradha"],["கேட்டை","Jyeshtha"],["மூலம்","Mula"],["பூராடம்","Purva Ashadha"],["உத்திராடம்","Uttara Ashadha"],["திருவோணம்","Shravana"],["அவிட்டம்","Dhanishtha"],["சதயம்","Shatabhisha"],["பூரட்டாதி","Purva Bhadrapada"],["உத்திரட்டாதி","Uttara Bhadrapada"],["ரேவதி","Revati"]];
+const LORDS=["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury","Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury","Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
+const RASI=[["மேஷம்","Aries"],["ரிஷபம்","Taurus"],["மிதுனம்","Gemini"],["கடகம்","Cancer"],["சிம்மம்","Leo"],["கன்னி","Virgo"],["துலாம்","Libra"],["விருச்சிகம்","Scorpio"],["தனுசு","Sagittarius"],["மகரம்","Capricorn"],["கும்பம்","Aquarius"],["மீனம்","Pisces"]];
+const $=id=>document.getElementById(id);let APP,state={mode:'fallback',lat:null,lon:null,timeline:[],current:null};
+const STORAGE_KEY='sarakalai_timing_v1';
+function saveTiming(mode, extra={}){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({mode, savedAt:Date.now(), ...extra}));
 }
-function renderOrbit(phase){const orbit=document.getElementById('orbit');orbit.innerHTML='';const size=orbit.clientWidth||340,c=size/2,r=size*.42;for(let i=0;i<30;i++){const angle=i*12*Math.PI/180;const x=c+r*Math.cos(angle),y=c-r*Math.sin(angle);const el=document.createElement('div');el.className=`node ${i===phase.block?'current':''} ${i===0?'new':''} ${i===15?'full':''}`;el.style.left=x+'px';el.style.top=y+'px';el.textContent=i;orbit.appendChild(el);}document.getElementById('moonInfo').textContent=`${phase.name} · ${phase.angle.toFixed(1)}° · Block ${phase.block}/30 · Light ${(phase.illum*100).toFixed(0)}%`;}
-function renderTree(ctx){const {phase,tablePick,parts,current,baseSunrise}=ctx;const tree=document.getElementById('tree');tree.className='tree';const phaseLabel=phase.kind==='rising'?'Rising/Waxing 0° → 180°':'Waning 180° → 360°';tree.innerHTML=`<details class="branch" open><summary><b>🌙 Moon</b><span class="tag">${phaseLabel}</span></summary><div class="children"><details class="branch" open><summary><b>${dayName()}</b><span class="tag">Weekday</span></summary><div class="children"><details class="branch" open><summary><b>${tablePick.period==='day'?'Day':'Night'}</b><span class="tag">Base sunrise ${hms(baseSunrise)} · ${tablePick.key}</span></summary><div class="children" id="partsHost"></div></details></div></details></div></details>`;
-const host=document.getElementById('partsHost');parts.forEach(p=>{const d=document.createElement('details');d.className='branch';d.open=p.part===current.part.part;d.innerHTML=`<summary><b>Part ${p.part} <span class="bird-small">${p.bird.icon}</span>${p.bird.label}</b><span class="tag">${hms(p.start)} → ${hms(p.end)} · ${p.duration.hms}</span></summary><div class="children"><div class="part-card"><div class="part-head"><b>Part ${p.part} activity rows</b><span class="tag">not equal split</span></div><div class="rows"></div></div></div>`;const rows=d.querySelector('.rows');p.rows.forEach(r=>{const active=r===current.row;const row=document.createElement('div');row.className=`activity-row ${active?'active':''}`;row.innerHTML=`<div class="num">${r.sub}</div><div><div class="act ${r.activity.cls}">${r.activity.label} <span class="muted">${r.activity.tamil}</span></div><div class="muted">${r.bird.icon} ${r.bird.label} · To offset ${r.toOffset} min</div></div><div class="meta"><b>${hms(r.start)} → ${hms(r.end)}</b><br><span class="tag">${r.duration.hms} · ${r.duration.s} sec${active?' · ACTIVE NOW':''}</span></div>`;rows.appendChild(row);});host.appendChild(d);});}
-function initWithSunrise(baseSunrise,label){const now=new Date();const phase=moonPhase(now);const tablePick=chooseTable(phase,baseSunrise,now);const parts=buildFromTable(tablePick.key,baseSunrise);const current=findCurrent(parts,now);const ctx={phase,tablePick,parts,current,baseSunrise};document.getElementById('statusText').textContent=label;renderCurrent(ctx);renderOrbit(phase);renderTree(ctx);}
-function demo(){const d=new Date();d.setHours(5,0,0,0);if(new Date()<d)d.setDate(d.getDate()-1);initWithSunrise(d,`Demo sunrise ${hms(d)}. Use location for local sunrise.`);}
-function useLocation(){if(!navigator.geolocation){demo();return;}document.getElementById('statusText').textContent='Asking for location…';navigator.geolocation.getCurrentPosition(pos=>{const now=new Date();let sr=new Date(now).sunrise(pos.coords.latitude,pos.coords.longitude);if(now<sr){const y=new Date(now);y.setDate(y.getDate()-1);sr=y.sunrise(pos.coords.latitude,pos.coords.longitude);}initWithSunrise(sr,`Local sunrise ${hms(sr)} · location used only in browser.`);},()=>demo(),{enableHighAccuracy:false,timeout:9000,maximumAge:600000});}
-document.getElementById('locBtn').addEventListener('click',useLocation);demo();setInterval(()=>{const text=document.getElementById('statusText').textContent;if(text.includes('Local sunrise')) useLocation(); else demo();},30000);
-Date.prototype.sunrise=function(latitude,longitude,zenith){return this.sunriseSet(latitude,longitude,true,zenith)};Date.prototype.sunset=function(latitude,longitude,zenith){return this.sunriseSet(latitude,longitude,false,zenith)};Date.prototype.sunriseSet=function(latitude,longitude,sunrise,zenith){if(!zenith)zenith=90.8333;var hoursFromMeridian=longitude/Date.DEGREES_PER_HOUR,dayOfYear=this.getDayOfYear(),approxTimeOfEventInDays,sunMeanAnomaly,sunTrueLongitude,ascension,rightAscension,lQuadrant,raQuadrant,sinDec,cosDec,cosLocalHourAngle,localHourAngle,localHour,localMeanTime,time;if(sunrise){approxTimeOfEventInDays=dayOfYear+(6-hoursFromMeridian)/24}else{approxTimeOfEventInDays=dayOfYear+(18.0-hoursFromMeridian)/24}sunMeanAnomaly=0.9856*approxTimeOfEventInDays-3.289;sunTrueLongitude=sunMeanAnomaly+1.916*Math.sinDeg(sunMeanAnomaly)+0.02*Math.sinDeg(2*sunMeanAnomaly)+282.634;sunTrueLongitude=Math.mod(sunTrueLongitude,360);ascension=0.91764*Math.tanDeg(sunTrueLongitude);rightAscension=(360/(2*Math.PI))*Math.atan(ascension);rightAscension=Math.mod(rightAscension,360);lQuadrant=Math.floor(sunTrueLongitude/90)*90;raQuadrant=Math.floor(rightAscension/90)*90;rightAscension=rightAscension+(lQuadrant-raQuadrant);rightAscension/=Date.DEGREES_PER_HOUR;sinDec=0.39782*Math.sinDeg(sunTrueLongitude);cosDec=Math.cosDeg(Math.asinDeg(sinDec));cosLocalHourAngle=(Math.cosDeg(zenith)-sinDec*Math.sinDeg(latitude))/(cosDec*Math.cosDeg(latitude));localHourAngle=Math.acosDeg(cosLocalHourAngle);if(sunrise)localHourAngle=360-localHourAngle;localHour=localHourAngle/Date.DEGREES_PER_HOUR;localMeanTime=localHour+rightAscension-0.06571*approxTimeOfEventInDays-6.622;time=localMeanTime-longitude/Date.DEGREES_PER_HOUR;time=Math.mod(time,24);var midnight=new Date(0);midnight.setUTCFullYear(this.getUTCFullYear());midnight.setUTCMonth(this.getUTCMonth());midnight.setUTCDate(this.getUTCDate());return new Date(midnight.getTime()+time*60*60*1000)};Date.DEGREES_PER_HOUR=360/24;Date.prototype.getDayOfYear=function(){var onejan=new Date(this.getFullYear(),0,1);return Math.ceil((this-onejan)/86400000)};Math.sinDeg=function(deg){return Math.sin((deg*2*Math.PI)/360)};Math.acosDeg=function(x){return Math.acos(x)*360/(2*Math.PI)};Math.asinDeg=function(x){return Math.asin(x)*360/(2*Math.PI)};Math.tanDeg=function(deg){return Math.tan((deg*2*Math.PI)/360)};Math.cosDeg=function(deg){return Math.cos((deg*2*Math.PI)/360)};Math.mod=function(a,b){var result=a%b;if(result<0)result+=b;return result};
+function loadSavedTiming(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch(e){return null}
+}
+function clearSavedTiming(){localStorage.removeItem(STORAGE_KEY)}
+function showTimingChoices(show){
+  const choices=$('timingChoice'), saved=$('savedTimingControls');
+  if(choices) choices.style.display=show?'flex':'none';
+  if(saved) saved.style.display=show?'none':'flex';
+}
+function pad(n){return String(n).padStart(2,'0')}function fmt(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}function hms(ms){const s=Math.max(0,Math.round(ms/1000)),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return `${pad(h)}:${pad(m)}:${pad(x)}`}function mmss(ms){const s=Math.max(0,Math.round(ms/1000)),m=Math.floor(s/60),x=s%60;return `${pad(m)}:${pad(x)}`}function addDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x}function dayTa(d){return DAY_ORDER_TA[d.getDay()]}function fmtDate(d){return d.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}
+function moonInfo(date=new Date()){
+ const syn=29.530588853,new0=Date.UTC(2000,0,6,18,14,0);
+ let age=((date-new0)/86400000)%syn;if(age<0)age+=syn;
+ const deg=age/syn*360,phase=deg<180?'Rising Moon':'Waning Moon',half=phase==='Rising Moon'?deg:deg-180,block=Math.min(15,Math.floor(half/12)+1);
+ const tithiIndex=Math.min(30,Math.floor(deg/12)+1);
+ const sid=((deg+13.176358*(date.getTime()/86400000))%360+360)%360;
+ const nakSize=360/27,padaSize=nakSize/4,nakIndex=Math.floor(sid/nakSize),pada=Math.floor((sid%nakSize)/padaSize)+1,rasiIndex=Math.floor(sid/30);
+ return{deg,phase,block,tithiIndex,tithi:TITHI[tithiIndex],siderealDeg:sid,nakTamil:NAKSHATRAS[nakIndex][0],nakEnglish:NAKSHATRAS[nakIndex][1],pada,lord:LORDS[nakIndex],rasiTamil:RASI[rasiIndex][0],rasiEnglish:RASI[rasiIndex][1]}
+}
+function key(phase,period){if(phase==='Rising Moon'&&period==='Day')return'rising_day';if(phase==='Rising Moon'&&period==='Night')return'rising_night';if(phase==='Waning Moon'&&period==='Day')return'waning_day';return'waning_night'}
+function sunEvent(date,lat,lon,rise){const d=new Date(date),zen=90.8333,N=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(d.getFullYear(),0,0))/86400000),lng=lon/15,t=N+(((rise?6:18)-lng)/24),M=.9856*t-3.289;let L=M+1.916*Math.sin(M*Math.PI/180)+.020*Math.sin(2*M*Math.PI/180)+282.634;L=(L+360)%360;let RA=Math.atan(.91764*Math.tan(L*Math.PI/180))*180/Math.PI;RA=(RA+360)%360;RA=(RA+(Math.floor(L/90)*90-Math.floor(RA/90)*90))/15;const sd=.39782*Math.sin(L*Math.PI/180),cd=Math.cos(Math.asin(sd)),ch=(Math.cos(zen*Math.PI/180)-sd*Math.sin(lat*Math.PI/180))/(cd*Math.cos(lat*Math.PI/180));if(ch>1||ch<-1)return fallback(date,rise);let H=rise?360-Math.acos(ch)*180/Math.PI:Math.acos(ch)*180/Math.PI;H/=15;const T=H+RA-.06571*t-6.622,UT=(T-lng+24)%24,utc=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0));utc.setUTCMinutes(Math.round(UT*60));return utc}
+function fallback(date,rise){const d=new Date(date);return new Date(d.getFullYear(),d.getMonth(),d.getDate(),rise?6:18,0,0)}
+function getSun(date,rise){if(state.mode==='location')return sunEvent(date,state.lat,state.lon,rise);if(state.mode==='manual'){let v=rise?$('manualSunrise')?.value:$('manualSunset')?.value,p=(v||(rise?'06:00:00':'18:00:00')).split(':').map(Number),d=new Date(date);return new Date(d.getFullYear(),d.getMonth(),d.getDate(),p[0]||0,p[1]||0,p[2]||0)}return fallback(date,rise)}
+function adhi(phase,day,period){let rows=APP.cycles[key(phase,period)][day]||[];return{adhi:rows[0]?.bird||{icon:'❔',name:'Unknown'},padu:rows[1]?.bird||{icon:'❔',name:'Unknown'}}}
+function build(){const now=new Date(),end=new Date(now.getTime()+7*864e5),all=[];for(let i=-1;i<=8;i++){let d=addDays(now,i),nd=addDays(d,1),sr=getSun(d,true),ss=getSun(d,false),nsr=getSun(nd,true);if(i===0){state.sunrise=sr;state.sunset=ss}for(const [period,start,finish] of [['Day',sr,ss],['Night',ss,nsr]]){let mp=moonInfo(start),k=key(mp.phase,period),dt=dayTa(start),rows=APP.cycles[k][dt]||[],a=adhi(mp.phase,dt,period),samMs=(finish-start)/5;for(let s=1;s<=5;s++){let s0=new Date(start.getTime()+samMs*(s-1)),s1=new Date(start.getTime()+samMs*s),cur=s0;rows.filter(r=>r.samam_en===`Samam ${s}`).forEach((r,idx)=>{let dur=samMs*r.minutes/144,from=new Date(cur),to=new Date(cur.getTime()+dur);all.push({...r,index:idx+1,from,to,duration:dur,phase:mp.phase,moonDeg:mp.deg,moonBlock:mp.block,tithiIndex:mp.tithiIndex,tithi:mp.tithi,siderealDeg:mp.siderealDeg,nakTamil:mp.nakTamil,nakEnglish:mp.nakEnglish,pada:mp.pada,lord:mp.lord,rasiTamil:mp.rasiTamil,rasiEnglish:mp.rasiEnglish,period,dayTa:dt,dayEn:DAY_EN[dt],samam:s,adhi:a.adhi,padu:a.padu});cur=to})}}}state.timeline=all.filter(c=>c.to>now&&c.from<end).sort((a,b)=>a.from-b.from);state.current=state.timeline.find(c=>now>=c.from&&now<c.to)||state.timeline[0]}
+function renderMoon(){
+ const c=state.current;if(!c)return;
+ if($('moonPhaseTitle')) $('moonPhaseTitle').textContent=c.phase==='Rising Moon'?'வளர்பிறை':'தேய்பிறை';
+ if($('tithiTitle')) $('tithiTitle').textContent=c.tithi || '--';
+ if($('rasiText')) $('rasiText').textContent=`${c.rasiTamil} / ${c.rasiEnglish}`;
+ if($('nakText')) $('nakText').textContent=`${c.nakTamil} / ${c.nakEnglish}`;
+ if($('padaText')) $('padaText').textContent=c.pada;
+ if($('lordText')) $('lordText').textContent=c.lord;
+ const strip=$('tithiStrip');
+ if(strip){
+   const start=c.phase==='Rising Moon'?0:15, end=c.phase==='Rising Moon'?15:30;
+   let html=`<span class="tithi-end">${start===0?'0°':'180°'}</span>`;
+   for(let i=start;i<=end;i++){
+     const active=i===c.tithiIndex, emoji=i===0||i===30?'🌑':(i===15?'🌕':(i<15?'🌔':'🌘'));
+     html+=`<span class="tithi-dot ${active?'active':''}" title="${TITHI[i]||''}">${active?'🟡':emoji}</span>`;
+   }
+   html+=`<span class="tithi-end">${end===15?'180°':'360°'}</span>`;
+   strip.innerHTML=html;
+ }
+ if($('tithiCaption')) $('tithiCaption').textContent=c.phase==='Rising Moon'?'0° right → 180° left · சுக்ல / வளர்பிறை':'180° left → 360° right · கிருஷ்ண / தேய்பிறை';
+}
+function renderMicro(c){
+ if(!c)return;
+ const now=new Date(),part=c.duration/5,act=Math.min(4,Math.max(0,Math.floor((now-c.from)/part)));
+ const dots=$('innerDots');
+ if(dots){dots.innerHTML='';for(let i=0;i<5;i++){const d=document.createElement('span');d.className='inner-dot '+(i<act?'done':(i===act?'active':''));dots.appendChild(d)}}
+ if($('innerText')) $('innerText').textContent=`Inner Part ${act+1} / 5`;
+}
+function renderCurrent(){
+ let c=state.current;if(!c)return;
+ let now=new Date(),remain=c.to-now,prog=Math.min(100,Math.max(0,((now-c.from)/c.duration)*100));
+ if($('currentIcon')) $('currentIcon').textContent=c.bird.icon;
+ if($('currentTitle')) $('currentTitle').textContent=`${c.bird.name} • ${c.activity_ta || c.activity_en}`;
+ if($('countdownText')) $('countdownText').textContent=`${mmss(remain)} remaining`;
+ if($('activityDurationText')) $('activityDurationText').textContent=`${mmss(c.duration)} total · ${fmt(c.from)} → ${fmt(c.to)}`;
+ if($('activityBar')) $('activityBar').style.width=`${prog}%`;
+ if($('activityPercentText')) $('activityPercentText').textContent=`${Math.round(prog)}% complete`;
+ if($('sunText')) $('sunText').textContent=`${fmt(state.sunrise)} / ${fmt(state.sunset)}`;
+ if($('periodText')) $('periodText').textContent=c.period;
+ if($('samamText')) $('samamText').textContent=`Samam ${c.samam}`;
+ if($('currentPath')) $('currentPath').textContent=`${fmt(c.from)} → ${fmt(c.to)}`;
+ if($('todayText')) $('todayText').textContent=`${c.dayTa} / ${c.dayEn}`;
+ if($('adhiText')) $('adhiText').textContent=`${c.adhi.icon} ${c.adhi.name}`;
+ if($('paduText')) $('paduText').textContent=`${c.padu.icon} ${c.padu.name}`;
+ renderMicro(c);renderMoon();
+}
+function card(c,active=false){return `<article class="timeline-card ${active?'active':''}"><div class="topline"><span>${fmtDate(c.from)} · ${c.phase==='Rising Moon'?'வளர்பிறை':'தேய்பிறை'} · ${c.tithi}</span><span>${c.period} · Samam ${c.samam}</span></div><div class="body"><div class="birdbig">${c.bird.icon}</div><div><div class="name">${c.bird.name} · ${c.activity_en}</div><div class="time">${fmt(c.from)} → ${fmt(c.to)} · ${hms(c.duration)}</div></div></div><div class="context"><div><small>Adhikara</small><b>${c.adhi.icon} ${c.adhi.name}</b></div><div><small>Padupatchi</small><b>${c.padu.icon} ${c.padu.name}</b></div><div><small>Units</small><b>${c.minutes}/144</b></div><div><small>Inner</small><b>${hms(c.duration/5)}</b></div></div></article>`}
+function renderCards(){let r=$('cardList');if(!r)return;let now=new Date();r.innerHTML=state.timeline.slice(0,120).map(c=>card(c,now>=c.from&&now<c.to)).join('')}
+function refresh(){build();renderCurrent();renderCards()}
+function setMode(m, save=true){
+ state.mode=m;
+ if(m==='manual'){$('manualPanel').style.display='block';showTimingChoices(true);return}
+ if(m==='fallback'){
+   if(save) saveTiming('fallback');
+   showTimingChoices(false);
+   if($('manualPanel')) $('manualPanel').style.display='none';
+   $('statusText').textContent='Traditional fallback active';
+   $('statusDetails').textContent='06:00 sunrise / 18:00 sunset';
+   refresh();
+ }
+}
+function useManual(){
+ state.mode='manual';
+ const sunrise=$('manualSunrise').value||'06:00:00';
+ const sunset=$('manualSunset').value||'18:00:00';
+ saveTiming('manual',{sunrise,sunset});
+ showTimingChoices(false);
+ if($('manualPanel')) $('manualPanel').style.display='none';
+ $('statusText').textContent='Manual timing active';
+ $('statusDetails').textContent=`Sunrise ${sunrise} / Sunset ${sunset}`;
+ refresh();
+}
+function useLocation(){
+ $('statusText').textContent='Requesting location...';
+ $('statusDetails').textContent='Checking GPS';
+ if(!navigator.geolocation){setMode('manual');return}
+ navigator.geolocation.getCurrentPosition(p=>{
+   state.lat=p.coords.latitude;
+   state.lon=p.coords.longitude;
+   state.mode='location';
+   saveTiming('location',{lat:state.lat,lon:state.lon});
+   showTimingChoices(false);
+   if($('manualPanel')) $('manualPanel').style.display='none';
+   refresh();
+   $('statusText').textContent='Local timing active';
+   $('statusDetails').textContent=`Saved location · Sunrise ${fmt(state.sunrise)} / Sunset ${fmt(state.sunset)}`;
+ },e=>{
+   console.warn(e);
+   $('statusText').textContent='Location unavailable';
+   $('statusDetails').textContent='Choose manual timing or traditional fallback.';
+   showTimingChoices(true);
+ },{enableHighAccuracy:false,timeout:12000,maximumAge:300000})
+}
+function renderWeek(phase,id){let root=$(id);if(!root)return;root.innerHTML=DAY_ORDER_TA.map(day=>{let a=adhi(phase,day,'Day');return `<article class="day-card"><div class="day-head"><b>${DAY_EN[day]}</b><span>${day}</span></div><div class="birdpair"><div class="role-card adhi"><div class="emoji">${a.adhi.icon}</div><div class="role">Adhikara</div><div class="bname">${a.adhi.name}</div></div><div class="role-card padu"><div class="emoji">${a.padu.icon}</div><div class="role">Padupatchi</div><div class="bname">${a.padu.name}</div></div></div></article>`}).join('')}
+function mini(r){return `<article class="mini-card ${CLS[r.activity_en]||''}"><div class="bird-img">${r.bird.icon}</div><div class="activity">${r.bird.name} · ${r.activity_en}</div><div class="units">${r.minutes} units</div><div class="lead">${r.activity_ta}</div></article>`}
+function renderTree(phase,id){let root=$(id);if(!root)return;root.innerHTML=DAY_ORDER_TA.map(day=>`<details><summary>${DAY_EN[day]} · ${day}</summary>${['Day','Night'].map(period=>{let rows=APP.cycles[key(phase,period)][day]||[];return `<details><summary>${period}</summary>${[1,2,3,4,5].map(s=>{let items=rows.filter(r=>r.samam_en===`Samam ${s}`);return `<div class="samam"><div class="samam-title"><b>Samam ${s}</b><span>${items.reduce((a,b)=>a+b.minutes,0)} units</span></div><div class="card-row">${items.map(mini).join('')}</div></div>`}).join('')}</details>`}).join('')}</details>`).join('')}
+async function init(){
+ APP=await fetch('data/panchapatchi-data.json').then(r=>r.json());
+ renderWeek('Rising Moon','risingWeek');
+ renderWeek('Waning Moon','waningWeek');
+ renderTree('Rising Moon','risingTree');
+ renderTree('Waning Moon','waningTree');
+
+ if($('locateBtn')) $('locateBtn').onclick=useLocation;
+ if($('manualBtn')) $('manualBtn').onclick=()=>{$('manualPanel').style.display='block'};
+ if($('fallbackBtn')) $('fallbackBtn').onclick=()=>setMode('fallback');
+ if($('setManualBtn')) $('setManualBtn').onclick=useManual;
+ if($('changeTimingBtn')) $('changeTimingBtn').onclick=()=>{
+   clearSavedTiming();
+   showTimingChoices(true);
+   if($('manualPanel')) $('manualPanel').style.display='none';
+   $('statusText').textContent='Choose timing method';
+   $('statusDetails').textContent='Use location, manual sunrise/sunset, or traditional 6am/6pm.';
+ };
+
+ const saved=loadSavedTiming();
+ if(saved && saved.mode==='location' && typeof saved.lat==='number' && typeof saved.lon==='number'){
+   state.mode='location'; state.lat=saved.lat; state.lon=saved.lon;
+   showTimingChoices(false); refresh();
+   $('statusText').textContent='Local timing active';
+   $('statusDetails').textContent=`Saved location · Sunrise ${fmt(state.sunrise)} / Sunset ${fmt(state.sunset)}`;
+ }else if(saved && saved.mode==='manual'){
+   if($('manualSunrise')) $('manualSunrise').value=saved.sunrise||'06:00:00';
+   if($('manualSunset')) $('manualSunset').value=saved.sunset||'18:00:00';
+   state.mode='manual'; showTimingChoices(false); refresh();
+   $('statusText').textContent='Manual timing active';
+   $('statusDetails').textContent=`Saved manual timing · Sunrise ${$('manualSunrise').value} / Sunset ${$('manualSunset').value}`;
+ }else if(saved && saved.mode==='fallback'){
+   setMode('fallback', false);
+ }else{
+   showTimingChoices(true);
+   setMode('fallback', false);
+   showTimingChoices(true);
+   $('statusText').textContent='Choose timing method';
+   $('statusDetails').textContent='Use location for local timing, or choose another method.';
+ }
+ setInterval(()=>{if(APP){build();renderCurrent()}},1000)
+}
+init();
