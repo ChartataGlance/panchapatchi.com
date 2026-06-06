@@ -51,29 +51,16 @@ function renderMoon(){
    const end=rising?'180° 🌕':'360° 🌑';
    const halfIndex=rising ? c.tithiIndex : c.tithiIndex-15;
    const pos=Math.max(1,Math.min(7,Math.ceil(halfIndex/2.15)));
-   const dot=(i)=>{
-     if(i===pos) return '🟡';
-     if(i<pos) return '●';
-     return '○';
-   };
-   const lines=[
-     start,
-     '      ╲',
-     '       '+dot(1),
-     '        '+dot(2),
-     '         '+dot(3),
-     '          '+dot(4),
-     '         '+dot(5),
-     '        '+dot(6),
-     '       '+dot(7),
-     '      ╱',
-     end
-   ];
+   let marks='';
+   for(let i=1;i<=7;i++){
+     const cls=i<pos?'passed':(i===pos?'active':'');
+     marks+=`<span class="arc-mark m${i} ${cls}"></span>`;
+   }
    strip.className='v033-lunar-curve';
-   strip.textContent=lines.join('\\n');
+   strip.innerHTML=`<div class="lunar-arc-fixed"><span class="arc-label arc-start">${start}</span>${marks}<span class="arc-label arc-end">${end}</span></div>`;
  }
  if($('tithiCaption')){
-   $('tithiCaption').innerHTML=`${c.tithi || 'Active Tithi'}<div class="v034-lunar-small">${Math.round(c.moonDeg)}° · ${c.phase==='Rising Moon'?'0° → 180°':'180° → 360°'}</div><div class="v034-lunar-legend"><span>● passed</span><span><b>🟡 now</b></span><span>○ next</span></div>`;
+   $('tithiCaption').innerHTML=`${c.tithi || 'Active Tithi'}<div class="v034-lunar-small">${Math.round(c.moonDeg)}° · ${c.phase==='Rising Moon'?'0° → 180°':'180° → 360°'}</div>`;
  }
 }
 function renderMicro(c){
@@ -195,6 +182,7 @@ async function init(){
  renderTree('Rising Moon','risingTree');
  renderTree('Waning Moon','waningTree');
 
+ if(!$('locateBtn') && !$('currentTitle')){return;}
  if($('locateBtn')) $('locateBtn').onclick=useLocation;
  if($('manualBtn')) $('manualBtn').onclick=()=>{$('manualPanel').style.display='block'};
  if($('fallbackBtn')) $('fallbackBtn').onclick=()=>setMode('fallback');
@@ -223,10 +211,12 @@ async function init(){
    setMode('fallback', false);
  }else{
    showTimingChoices(true);
-   setMode('fallback', false);
-   showTimingChoices(true);
-   $('statusText').textContent='Choose timing method';
-   $('statusDetails').textContent='Use location for local timing, or choose another method.';
+   if($('statusText')){
+     setMode('fallback', false);
+     showTimingChoices(true);
+     $('statusText').textContent='Choose timing method';
+     $('statusDetails').textContent='Use location for local timing, or choose another method.';
+   }
  }
  setInterval(()=>{if(APP){build();renderCurrent()}},1000)
 }
