@@ -7,14 +7,17 @@ const NAKSHATRAS=[["அஸ்வினி","Ashvini"],["பரணி","Bharani"]
 const LORDS=["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury","Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury","Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
 const RASI=[["மேஷம்","Aries"],["ரிஷபம்","Taurus"],["மிதுனம்","Gemini"],["கடகம்","Cancer"],["சிம்மம்","Leo"],["கன்னி","Virgo"],["துலாம்","Libra"],["விருச்சிகம்","Scorpio"],["தனுசு","Sagittarius"],["மகரம்","Capricorn"],["கும்பம்","Aquarius"],["மீனம்","Pisces"]];
 const $=id=>document.getElementById(id);let APP,state={mode:'fallback',lat:null,lon:null,timeline:[],current:null};
-const STORAGE_KEY='sarakalai_timing_v1';
+const STORAGE_KEY='panchapatchi_timing_v1';
+let lastTwelveRender=0;
 function saveTiming(mode, extra={}){
   localStorage.setItem(STORAGE_KEY, JSON.stringify({mode, savedAt:Date.now(), ...extra}));
 }
 function loadSavedTiming(){
-  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch(e){return null}
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)||localStorage.getItem('sarakalai_timing_v1')||'null')
+  }catch(e){return null}
 }
-function clearSavedTiming(){localStorage.removeItem(STORAGE_KEY)}
+function clearSavedTiming(){localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('sarakalai_timing_v1')}
 function showTimingChoices(show){
   const choices=$('timingChoice'), saved=$('savedTimingControls');
   if(choices) choices.style.display=show?'flex':'none';
@@ -103,9 +106,12 @@ function qualityForActivity(activity){
 }
 function renderTwelveParts(c){
  const root=$('twelveRow');if(!root||!c)return;
- const now=new Date();
+ const now=state.renderNow||new Date();
  const progress=Math.min(1,Math.max(0,(now-c.from)/c.duration));
+ if(now.getTime()-lastTwelveRender<2000 && root.children.length){return;}
+ lastTwelveRender=now.getTime();
  const active=Math.min(12,Math.max(1,Math.floor(progress*12)+1));
+ root.style.setProperty('--progress', `${Math.min(100,Math.max(0,progress*100))}%`);
  root.innerHTML='';
  for(let i=1;i<=12;i++){
    const b=document.createElement('span');
@@ -113,16 +119,15 @@ function renderTwelveParts(c){
    b.textContent=i<=5?String(i):'';
    root.appendChild(b);
  }
- if($('twelveCaption')) $('twelveCaption').textContent=`Part ${active} / 12`;
- const q=qualityForActivity(c.activity_en);
- if($('qualityText')) $('qualityText').textContent=`${q.stars} ${q.label}`;
+ if($('twelveCaption')) $('twelveCaption').textContent='';
+ if($('qualityText')) $('qualityText').textContent='';
 }
 function renderCurrent(){
  let c=state.current;if(!c)return;
- let now=new Date(),remain=c.to-now,prog=Math.min(100,Math.max(0,((now-c.from)/c.duration)*100));
+ let now=state.renderNow||new Date(),remain=c.to-now,prog=Math.min(100,Math.max(0,((now-c.from)/c.duration)*100));
  const meta=activityMeta(c.activity_en);
  const q=qualityForActivity(c.activity_en);
- if($('currentTitle')) $('currentTitle').innerHTML=`<span class="current-bird-hero">${c.bird.icon}</span><span><span class="current-bird-name">${c.bird.name}</span><span class="current-activity-line">${meta.emoji} ${c.activity_ta || meta.ta} • ${meta.en}</span><span class="good-time-badge">${q.stars} ${meta.good}</span></span>`;
+ if($('currentTitle')) $('currentTitle').innerHTML=`<span class="current-bird-hero">${c.bird.icon}</span><span><span class="live-hero-meta"><span class="current-bird-name">${c.bird.name}</span><span class="atcharam-badge"><small>அட்சரம்</small><b>${c.atcharam || '-'}</b></span></span><span class="current-activity-line">${meta.emoji} ${c.activity_ta || meta.ta} • ${meta.en}</span><span class="good-time-badge">${meta.good}</span></span>`;
  if($('countdownText')) $('countdownText').textContent=`⏳ ${mmss(remain)}`;
  if($('activityDurationText')) $('activityDurationText').textContent=`${mmss(c.duration)} total · ends ${fmt(c.to)}`;
  if($('activityBar')) $('activityBar').style.width=`0%`;
@@ -143,30 +148,30 @@ function renderCards(){let r=$('cardList');if(!r)return;let now=new Date();r.inn
 function refresh(){build();renderCurrent();renderCards()}
 function setMode(m, save=true){
  state.mode=m;
- if(m==='manual'){$('manualPanel').style.display='block';showTimingChoices(true);return}
+ if(m==='manual'){if($('manualPanel')) $('manualPanel').style.display='block';showTimingChoices(true);return}
  if(m==='fallback'){
    if(save) saveTiming('fallback');
    showTimingChoices(false);
    if($('manualPanel')) $('manualPanel').style.display='none';
-   $('statusText').textContent='Traditional fallback active';
-   $('statusDetails').textContent='06:00 sunrise / 18:00 sunset';
+   if($('statusText')) $('statusText').textContent='Traditional fallback active';
+   if($('statusDetails')) $('statusDetails').textContent='06:00 sunrise / 18:00 sunset';
    refresh();
  }
 }
 function useManual(){
  state.mode='manual';
- const sunrise=$('manualSunrise').value||'06:00:00';
- const sunset=$('manualSunset').value||'18:00:00';
+ const sunrise=($('manualSunrise')&&$('manualSunrise').value)||'06:00:00';
+ const sunset=($('manualSunset')&&$('manualSunset').value)||'18:00:00';
  saveTiming('manual',{sunrise,sunset});
  showTimingChoices(false);
  if($('manualPanel')) $('manualPanel').style.display='none';
- $('statusText').textContent='Manual timing active';
- $('statusDetails').textContent=`Sunrise ${sunrise} / Sunset ${sunset}`;
+ if($('statusText')) $('statusText').textContent='Manual timing active';
+ if($('statusDetails')) $('statusDetails').textContent=`Sunrise ${sunrise} / Sunset ${sunset}`;
  refresh();
 }
 function useLocation(){
- $('statusText').textContent='Requesting location...';
- $('statusDetails').textContent='Checking GPS';
+ if($('statusText')) $('statusText').textContent='Requesting location...';
+ if($('statusDetails')) $('statusDetails').textContent='Checking GPS';
  if(!navigator.geolocation){setMode('manual');return}
  navigator.geolocation.getCurrentPosition(p=>{
    state.lat=p.coords.latitude;
@@ -176,12 +181,12 @@ function useLocation(){
    showTimingChoices(false);
    if($('manualPanel')) $('manualPanel').style.display='none';
    refresh();
-   $('statusText').textContent='Local timing active';
-   $('statusDetails').textContent=`Saved location · Sunrise ${fmt(state.sunrise)} / Sunset ${fmt(state.sunset)}`;
+   if($('statusText')) $('statusText').textContent='Local timing active';
+   if($('statusDetails')) $('statusDetails').textContent=`Saved location · Sunrise ${fmt(state.sunrise)} / Sunset ${fmt(state.sunset)}`;
  },e=>{
    console.warn(e);
-   $('statusText').textContent='Location unavailable';
-   $('statusDetails').textContent='Choose manual timing or traditional fallback.';
+   if($('statusText')) $('statusText').textContent='Location unavailable';
+   if($('statusDetails')) $('statusDetails').textContent='Choose manual timing or traditional fallback.';
    showTimingChoices(true);
  },{enableHighAccuracy:false,timeout:12000,maximumAge:300000})
 }
@@ -204,22 +209,22 @@ async function init(){
    clearSavedTiming();
    showTimingChoices(true);
    if($('manualPanel')) $('manualPanel').style.display='none';
-   $('statusText').textContent='Choose timing method';
-   $('statusDetails').textContent='Use location, manual sunrise/sunset, or traditional 6am/6pm.';
+   if($('statusText')) $('statusText').textContent='Choose timing method';
+   if($('statusDetails')) $('statusDetails').textContent='Use location, manual sunrise/sunset, or traditional 6am/6pm.';
  };
 
  const saved=loadSavedTiming();
  if(saved && saved.mode==='location' && typeof saved.lat==='number' && typeof saved.lon==='number'){
    state.mode='location'; state.lat=saved.lat; state.lon=saved.lon;
    showTimingChoices(false); refresh();
-   $('statusText').textContent='Local timing active';
-   $('statusDetails').textContent=`Saved location · Sunrise ${fmt(state.sunrise)} / Sunset ${fmt(state.sunset)}`;
+   if($('statusText')) $('statusText').textContent='Local timing active';
+   if($('statusDetails')) $('statusDetails').textContent=`Saved location · Sunrise ${fmt(state.sunrise)} / Sunset ${fmt(state.sunset)}`;
  }else if(saved && saved.mode==='manual'){
    if($('manualSunrise')) $('manualSunrise').value=saved.sunrise||'06:00:00';
    if($('manualSunset')) $('manualSunset').value=saved.sunset||'18:00:00';
    state.mode='manual'; showTimingChoices(false); refresh();
-   $('statusText').textContent='Manual timing active';
-   $('statusDetails').textContent=`Saved manual timing · Sunrise ${$('manualSunrise').value} / Sunset ${$('manualSunset').value}`;
+   if($('statusText')) $('statusText').textContent='Manual timing active';
+   if($('statusDetails')) $('statusDetails').textContent=`Saved manual timing · Sunrise ${$('manualSunrise')?$('manualSunrise').value:'06:00:00'} / Sunset ${$('manualSunset')?$('manualSunset').value:'18:00:00'}`;
  }else if(saved && saved.mode==='fallback'){
    setMode('fallback', false);
  }else{
@@ -227,10 +232,12 @@ async function init(){
    if($('statusText')){
      setMode('fallback', false);
      showTimingChoices(true);
-     $('statusText').textContent='Choose timing method';
-     $('statusDetails').textContent='Use location for local timing, or choose another method.';
+     if($('statusText')) $('statusText').textContent='Choose timing method';
+     if($('statusDetails')) $('statusDetails').textContent='Use location for local timing, or choose another method.';
    }
  }
- setInterval(()=>{if(APP){build();renderCurrent()}},1000)
+ if(!window.SARAKALAI_LOOKUP_PAGE){if(!window.SARAKALAI_LOOKUP_PAGE){if(!window.SARAKALAI_LOOKUP_PAGE){setInterval(()=>{if(APP){build();renderCurrent()}},1000)}}}
 }
 init();
+
+window.PANCHAPATCHI_APP_API={getSun, moonInfo, fmt, STORAGE_KEY};

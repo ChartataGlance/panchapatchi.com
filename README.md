@@ -1,6 +1,5 @@
-# v042 render fixed
+# Panchapatchi.com
 
-Clean rebuilt app. Lunar labels: 180°/360° top, moon emojis bottom corners. Compact mobile nav.
+GitHub Pages build for Panchapatchi live timing, lookup, and calculation reference.
 
-assets/js/app.js: OK
-assets/js/profile.js: OK
+Custom domain: panchapatchi.com

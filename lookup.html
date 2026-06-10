@@ -1,7 +1,7 @@
 <!doctype html><html lang="ta"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Panchapatchi.com live Panchapatchi timing calculator with local sunrise, sunset, moon phase, tithi, nakshatra, adhikara patchi, padu patchi, bird activity and countdown.">
+<meta name="description" content="Lookup Panchapatchi timing for any selected date and time with moon phase, tithi, nakshatra, adhikara patchi, padu patchi, bird activity, samam and inner parts.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://panchapatchi.com/">
+<link rel="canonical" href="https://panchapatchi.com/lookup.html">
 <meta name="theme-color" content="#020713">
 <meta name="application-name" content="Panchapatchi">
 <meta name="apple-mobile-web-app-title" content="Panchapatchi">
@@ -10,14 +10,14 @@
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Panchapatchi">
-<meta property="og:title" content="Panchapatchi Live Timing | Panchapatchi.com">
-<meta property="og:description" content="Panchapatchi.com live Panchapatchi timing calculator with local sunrise, sunset, moon phase, tithi, nakshatra, adhikara patchi, padu patchi, bird activity and countdown.">
-<meta property="og:url" content="https://panchapatchi.com/">
+<meta property="og:title" content="Panchapatchi Lookup by Date and Time | Panchapatchi.com">
+<meta property="og:description" content="Lookup Panchapatchi timing for any selected date and time with moon phase, tithi, nakshatra, adhikara patchi, padu patchi, bird activity, samam and inner parts.">
+<meta property="og:url" content="https://panchapatchi.com/lookup.html">
 <meta property="og:locale" content="ta_IN">
 
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Panchapatchi Live Timing | Panchapatchi.com">
-<meta name="twitter:description" content="Panchapatchi.com live Panchapatchi timing calculator with local sunrise, sunset, moon phase, tithi, nakshatra, adhikara patchi, padu patchi, bird activity and countdown.">
+<meta name="twitter:title" content="Panchapatchi Lookup by Date and Time | Panchapatchi.com">
+<meta name="twitter:description" content="Lookup Panchapatchi timing for any selected date and time with moon phase, tithi, nakshatra, adhikara patchi, padu patchi, bird activity, samam and inner parts.">
 
 <script type="application/ld+json">
 {
@@ -27,14 +27,14 @@
   "url": "https://panchapatchi.com",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "Any",
-  "description": "Panchapatchi.com live Panchapatchi timing calculator with local sunrise, sunset, moon phase, tithi, nakshatra, adhikara patchi, padu patchi, bird activity and countdown.",
+  "description": "Lookup Panchapatchi timing for any selected date and time with moon phase, tithi, nakshatra, adhikara patchi, padu patchi, bird activity, samam and inner parts.",
   "inLanguage": [
     "ta",
     "en"
   ]
 }
-</script><title>Panchapatchi Live Timing | Panchapatchi.com</title><link rel="stylesheet" href="assets/css/style.css"><link rel="manifest" href="site.webmanifest">
-</head><body><nav class="nav"><div class="nav-inner"><div class="brand">🌙 Panchapatchi</div><div class="menu"><a class="btn" href="index.html">Live</a><a class="btn" href="lookup.html">Lookup</a><a class="btn" href="reference.html">Reference</a></div></div></nav><main class="wrap">
+</script><title>Panchapatchi Lookup by Date and Time | Panchapatchi.com</title><link rel="stylesheet" href="assets/css/style.css"><link rel="manifest" href="site.webmanifest">
+</head><body class="lookup-page"><nav class="nav"><div class="nav-inner"><div class="brand">🌙 Panchapatchi</div><div class="menu"><a class="btn" href="index.html">Live</a><a class="btn" href="lookup.html">Lookup</a><a class="btn" href="reference.html">Reference</a></div></div></nav><main class="wrap">
 <section class="live-card v032">
   <div class="live-card-head v032-head">
     <div>
@@ -81,16 +81,20 @@
       <div class="stat"><b>Time</b><span id="currentPath">--</span></div>
     </div>
   </div>
+
   <div class="live-section" id="timingChoice">
     <div class="controls"><button class="primary" id="locateBtn">Use My Location</button><button id="manualBtn">Manual Sunrise/Sunset</button><button id="fallbackBtn">Traditional 6am/6pm</button></div>
     <div class="input-panel" id="manualPanel" style="display:none"><b>Manual timing</b><br><input id="manualSunrise" type="time" step="1" value="06:00:00"><input id="manualSunset" type="time" step="1" value="18:00:00"><button class="primary" id="setManualBtn">Set Timing</button></div>
-    <div class="status"><b id="statusText">Loading</b><span id="statusDetails">Preparing.</span></div>
+    <div class="status"><b id="statusText">Lookup timing</b><span id="statusDetails">Choose local, manual, or traditional timing for this lookup.</span></div>
   </div>
 </section>
-<section class="section"><div class="section-head"><h2>Cards from now to next week</h2><span class="badge">Scroll timeline</span></div><div class="pad"><div class="card-list" id="cardList"></div></div></section>
-</main><script src="assets/js/app.js"></script><div class="mobile-bottom-nav">
-<a class="active" href="index.html"><span class="ico">🏠</span><span>Live</span></a>
-<a class="" href="lookup.html"><span class="ico">🔎</span><span>Lookup</span></a>
+<section class="lookup-dock"><div class="lookup-dock-inner"><div><label for="lookupDate">Date</label><input id="lookupDate" type="date"></div><div><label for="lookupTime">Time</label><input id="lookupTime" type="time" step="1"></div><button id="lookupNowBtn" type="button">Now</button></div></section>
+<section class="section"><div class="section-head"><h2>Selected Time Result</h2><span class="badge">Lookup</span></div><div class="pad"><div class="card-list" id="cardList"></div></div></section>
+</main><script>window.SARAKALAI_LOOKUP_PAGE=true;</script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/lookup.js"></script><div class="mobile-bottom-nav">
+<a class="" href="index.html"><span class="ico">🏠</span><span>Live</span></a>
+<a class="active" href="lookup.html"><span class="ico">🔎</span><span>Lookup</span></a>
 <a class="" href="reference.html"><span class="ico">📖</span><span>Info</span></a>
 </div>
 </body></html>
