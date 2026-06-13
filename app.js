@@ -38,7 +38,7 @@ const ADHIKARA_PADU = {
   shukla_day:[{adhikara:'Vulture',padu:'Owl'},{adhikara:'Owl',padu:'Crow'},{adhikara:'Vulture',padu:'Cock'},{adhikara:'Owl',padu:'Peacock'},{adhikara:'Crow',padu:'Vulture'},{adhikara:'Cock',padu:'Owl'},{adhikara:'Peacock',padu:'Vulture'}],
   shukla_night:[{adhikara:'Crow',padu:'Owl'},{adhikara:'Cock',padu:'Crow'},{adhikara:'Crow',padu:'Cock'},{adhikara:'Cock',padu:'Peacock'},{adhikara:'Peacock',padu:'Vulture'},{adhikara:'Vulture',padu:'Owl'},{adhikara:'Owl',padu:'Vulture'}],
   krishna_day:[{adhikara:'Cock',padu:'Crow'},{adhikara:'Peacock',padu:'Owl'},{adhikara:'Cock',padu:'Vulture'},{adhikara:'Crow',padu:'Peacock'},{adhikara:'Owl',padu:'Cock'},{adhikara:'Vulture',padu:'Peacock'},{adhikara:'Peacock',padu:'Cock'}],
-  krishna_night:[{adhikara:'Vulture',padu:'Crow'},{adhikara:'Cock',padu:'Owl'},{adhikara:'Vulture',padu:'Vulture'},{adhikara:'Owl',padu:'Peacock'},{adhikara:'Crow',padu:'Cock'},{adhikara:'Peacock',padu:'Peacock'},{adhikara:'Unknown',padu:'Cock'}],
+  krishna_night:[{adhikara:'Vulture',padu:'Crow'},{adhikara:'Cock',padu:'Owl'},{adhikara:'Vulture',padu:'Vulture'},{adhikara:'Owl',padu:'Peacock'},{adhikara:'Crow',padu:'Cock'},{adhikara:'Peacock',padu:'Peacock'},{adhikara:'Cock',padu:'Cock'}],
 };
 
 const PANCHAPATCHI_TABLES = {
@@ -119,11 +119,18 @@ function dayNightStats(dn){
   if(dn.period==='day'){total=Math.max(1,sunset-sunrise); elapsed=selected-sunrise;} else {total=Math.max(1,(1440-sunset)+sunrise); elapsed=selected>=sunset?selected-sunset:selected+1440-sunset;}
   elapsed=Math.max(0,Math.min(total,elapsed)); return {progress:(elapsed/total)*100, elapsed, total, remaining:total-elapsed};
 }
+function authorityFor(paksha, dayNight, wd){
+  const table = PANCHAPATCHI_TABLES[`${paksha}_${dayNight}`];
+  const birds = table?.birds?.[wd] || table?.birds?.[0] || [];
+  const raw = ADHIKARA_PADU[`${paksha}_${dayNight}`]?.[wd] || {};
+  const adhikara = raw.adhikara && raw.adhikara !== 'Unknown' ? raw.adhikara : (birds[0] || 'Unknown');
+  return { adhikara, padu: raw.padu || 'Unknown' };
+}
 function panchapatchiRows(paksha, dayNight, wd, samam, stats){
   const table = PANCHAPATCHI_TABLES[`${paksha}_${dayNight}`]; if(!table||!stats) return [];
   const birds=table.birds[wd]||table.birds[0], samamLength=stats.total/5, ratio=samamLength/144;
-  let cursor=(samam-1)*samamLength; const authority=ADHIKARA_PADU[`${paksha}_${dayNight}`]?.[wd]||{};
-  return birds.map((bird,i)=>{const activity=table.acts[(i+samam-1)%5], duration=table.minutes[activity]*ratio, start=cursor, end=cursor+duration; cursor=end; return {bird,activity,duration,start,end,adhikara:authority.adhikara||'',padu:authority.padu||'',isAdhikara:bird===authority.adhikara,isPadu:bird===authority.padu,meta:ACTIVITY_META[activity]};});
+  let cursor=(samam-1)*samamLength; const authority=authorityFor(paksha, dayNight, wd);
+  return birds.map((bird,i)=>{const activity=table.acts[(i+samam-1)%5], duration=table.minutes[activity]*ratio, start=cursor, end=cursor+duration; cursor=end; return {bird,activity,duration,start,end,adhikara:authority.adhikara,padu:authority.padu,isAdhikara:bird===authority.adhikara,isPadu:bird===authority.padu,meta:ACTIVITY_META[activity]};});
 }
 
 function renderWeekdays(){weekdayTabs.innerHTML=WEEKDAYS.map((d,i)=>`<button class="weekday-button ${i===weekday()?'active':''}">${d}</button>`).join('');}
@@ -135,7 +142,7 @@ function renderTithi(t){
 function updateDayNightButtons(name, progress, paksha){
   $$('.daynight-button').forEach(btn=>{
     const active=btn.dataset.daynight===name; btn.classList.toggle('active',active);
-    const auth=ADHIKARA_PADU[`${paksha}_${btn.dataset.daynight}`]?.[weekday()]||{};
+    const auth=authorityFor(paksha, btn.dataset.daynight, weekday());
     btn.querySelector('.authority-line').innerHTML=`<span>அதி ${BIRD_ICONS[auth.adhikara]||''} ${esc(auth.adhikara||'--')}</span><span>படு ${BIRD_ICONS[auth.padu]||''} ${esc(auth.padu||'--')}</span>`;
     btn.querySelectorAll('b').forEach((block,i)=>{const s=i*20,e=s+20; block.classList.toggle('filled',active&&progress>=e); block.classList.toggle('partial',active&&progress>s&&progress<e); if(active&&progress>s&&progress<e) block.style.setProperty('--fill',`${((progress-s)/20)*100}%`); else block.style.removeProperty('--fill');});
   });
